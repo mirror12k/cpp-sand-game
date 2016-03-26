@@ -121,66 +121,20 @@ void run_sand (uint32_t* sand, uint32_t* target_buffer)
 //            }
 
             uint32_t color = sand[y * i_screen_width + x];
-            if (color == color_sand)
+            if (color == target_buffer[y * i_screen_width + x])
             {
-                bool left_free = target_buffer[(y + 1) * i_screen_width + x - 1] == color_black ||
-                    target_buffer[(y + 1) * i_screen_width + x - 1] == color_water;
-                bool center_free = target_buffer[(y + 1) * i_screen_width + x] == color_black ||
-                    target_buffer[(y + 1) * i_screen_width + x] == color_water;
-                bool right_free = target_buffer[(y + 1) * i_screen_width + x + 1] == color_black ||
-                    target_buffer[(y + 1) * i_screen_width + x + 1] == color_water;
-
-                if (left_free || center_free || right_free)
+                if (color == color_sand)
                 {
-                    switch (rand() % 4)
-                    {
-                    case 0:
-                    if (left_free)
-                    {
-                        target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x - 1];
-                        target_buffer[(y + 1) * i_screen_width + x - 1] = color;
-                    }
-                    else
-                    {
-                        switch (rand() % 2)
-                        {
-                        case 0:
-                        if (center_free)
-                        {
-                            target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x];
-                            target_buffer[(y + 1) * i_screen_width + x] = color;
-                        }
-                        else
-                        {
-                            target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x + 1];
-                            target_buffer[(y + 1) * i_screen_width + x + 1] = color;
-                        }
-                        break;
-                        case 1:
-                        if (right_free)
-                        {
-                            target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x + 1];
-                            target_buffer[(y + 1) * i_screen_width + x + 1] = color;
-                        }
-                        else
-                        {
-                            target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x];
-                            target_buffer[(y + 1) * i_screen_width + x] = color;
-                        }
-                        break;
-                        }
-                    }
-                    break;
+                    bool left_free = target_buffer[(y + 1) * i_screen_width + x - 1] == color_black ||
+                        target_buffer[(y + 1) * i_screen_width + x - 1] == color_water;
+                    bool center_free = target_buffer[(y + 1) * i_screen_width + x] == color_black ||
+                        target_buffer[(y + 1) * i_screen_width + x] == color_water;
+                    bool right_free = target_buffer[(y + 1) * i_screen_width + x + 1] == color_black ||
+                        target_buffer[(y + 1) * i_screen_width + x + 1] == color_water;
 
-                    case 1:
-                    if (center_free)
+                    if (left_free || center_free || right_free)
                     {
-                        target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x];
-                        target_buffer[(y + 1) * i_screen_width + x] = color;
-                    }
-                    else
-                    {
-                        switch (rand() % 2)
+                        switch (rand() % 4)
                         {
                         case 0:
                         if (left_free)
@@ -190,48 +144,36 @@ void run_sand (uint32_t* sand, uint32_t* target_buffer)
                         }
                         else
                         {
-                            target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x + 1];
-                            target_buffer[(y + 1) * i_screen_width + x + 1] = color;
+                            switch (rand() % 2)
+                            {
+                            case 0:
+                            if (center_free)
+                            {
+                                target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x];
+                                target_buffer[(y + 1) * i_screen_width + x] = color;
+                            }
+                            else
+                            {
+                                target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x + 1];
+                                target_buffer[(y + 1) * i_screen_width + x + 1] = color;
+                            }
+                            break;
+                            case 1:
+                            if (right_free)
+                            {
+                                target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x + 1];
+                                target_buffer[(y + 1) * i_screen_width + x + 1] = color;
+                            }
+                            else
+                            {
+                                target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x];
+                                target_buffer[(y + 1) * i_screen_width + x] = color;
+                            }
+                            break;
+                            }
                         }
                         break;
-                        case 1:
-                        if (right_free)
-                        {
-                            target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x + 1];
-                            target_buffer[(y + 1) * i_screen_width + x + 1] = color;
-                        }
-                        else
-                        {
-                            target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x - 1];
-                            target_buffer[(y + 1) * i_screen_width + x - 1] = color;
-                        }
-                        break;
-                        }
-                    }
-                    break;
 
-                    case 2:
-                    if (right_free)
-                    {
-                        target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x + 1];
-                        target_buffer[(y + 1) * i_screen_width + x + 1] = color;
-                    }
-                    else
-                    {
-                        switch (rand() % 2)
-                        {
-                        case 0:
-                        if (left_free)
-                        {
-                            target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x - 1];
-                            target_buffer[(y + 1) * i_screen_width + x - 1] = color;
-                        }
-                        else
-                        {
-                            target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x];
-                            target_buffer[(y + 1) * i_screen_width + x] = color;
-                        }
-                        break;
                         case 1:
                         if (center_free)
                         {
@@ -240,81 +182,142 @@ void run_sand (uint32_t* sand, uint32_t* target_buffer)
                         }
                         else
                         {
-                            target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x - 1];
-                            target_buffer[(y + 1) * i_screen_width + x - 1] = color;
-                        }
-                        break;
-                        }
-                    }
-                    break;
-                    }
-                }
-            }
-            else if (color == color_water)
-            {
-
-                bool left_free = target_buffer[(y + 1) * i_screen_width + x - 1] == color_black;
-                bool center_free = target_buffer[(y + 1) * i_screen_width + x] == color_black;
-                bool right_free = target_buffer[(y + 1) * i_screen_width + x + 1] == color_black;
-                bool center_left_free = target_buffer[y * i_screen_width + x - 1] == color_black;
-                bool center_right_free = target_buffer[y * i_screen_width + x + 1] == color_black;
-                if (left_free || center_free || right_free || center_left_free || center_right_free)
-                {
-                    bool not_moved = true;
-                    while (not_moved)
-                    {
-                        switch (rand() % 8)
-                        {
-                        case 0:
-                        case 1:
-                        if (center_left_free)
-                        {
-                            target_buffer[y * i_screen_width + x] = color_black;
-                            target_buffer[y * i_screen_width + x - 1] = color;
-                            not_moved = false;
+                            switch (rand() % 2)
+                            {
+                            case 0:
+                            if (left_free)
+                            {
+                                target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x - 1];
+                                target_buffer[(y + 1) * i_screen_width + x - 1] = color;
+                            }
+                            else
+                            {
+                                target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x + 1];
+                                target_buffer[(y + 1) * i_screen_width + x + 1] = color;
+                            }
+                            break;
+                            case 1:
+                            if (right_free)
+                            {
+                                target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x + 1];
+                                target_buffer[(y + 1) * i_screen_width + x + 1] = color;
+                            }
+                            else
+                            {
+                                target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x - 1];
+                                target_buffer[(y + 1) * i_screen_width + x - 1] = color;
+                            }
+                            break;
+                            }
                         }
                         break;
 
                         case 2:
-                        case 3:
-                        if (center_right_free)
-                        {
-                            target_buffer[y * i_screen_width + x] = color_black;
-                            target_buffer[y * i_screen_width + x + 1] = color;
-                            not_moved = false;
-                        }
-                        break;
-
-                        case 4:
-                        if (left_free)
-                        {
-                            target_buffer[y * i_screen_width + x] = color_black;
-                            target_buffer[(y + 1) * i_screen_width + x - 1] = color;
-                            not_moved = false;
-                        }
-                        break;
-
-                        case 5:
-                        if (center_free)
-                        {
-                            target_buffer[y * i_screen_width + x] = color_black;
-                            target_buffer[(y + 1) * i_screen_width + x] = color;
-                            not_moved = false;
-                        }
-                        break;
-
-                        case 6:
                         if (right_free)
                         {
-                            target_buffer[y * i_screen_width + x] = color_black;
+                            target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x + 1];
                             target_buffer[(y + 1) * i_screen_width + x + 1] = color;
-                            not_moved = false;
+                        }
+                        else
+                        {
+                            switch (rand() % 2)
+                            {
+                            case 0:
+                            if (left_free)
+                            {
+                                target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x - 1];
+                                target_buffer[(y + 1) * i_screen_width + x - 1] = color;
+                            }
+                            else
+                            {
+                                target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x];
+                                target_buffer[(y + 1) * i_screen_width + x] = color;
+                            }
+                            break;
+                            case 1:
+                            if (center_free)
+                            {
+                                target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x];
+                                target_buffer[(y + 1) * i_screen_width + x] = color;
+                            }
+                            else
+                            {
+                                target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x - 1];
+                                target_buffer[(y + 1) * i_screen_width + x - 1] = color;
+                            }
+                            break;
+                            }
                         }
                         break;
+                        }
+                    }
+                }
+                else if (color == color_water)
+                {
 
-                        case 7:
-                        not_moved = false;
-                        break;
+                    bool left_free = target_buffer[(y + 1) * i_screen_width + x - 1] == color_black;
+                    bool center_free = target_buffer[(y + 1) * i_screen_width + x] == color_black;
+                    bool right_free = target_buffer[(y + 1) * i_screen_width + x + 1] == color_black;
+                    bool center_left_free = target_buffer[y * i_screen_width + x - 1] == color_black;
+                    bool center_right_free = target_buffer[y * i_screen_width + x + 1] == color_black;
+                    if (left_free || center_free || right_free || center_left_free || center_right_free)
+                    {
+                        bool not_moved = true;
+                        while (not_moved)
+                        {
+                            switch (rand() % 8)
+                            {
+                            case 0:
+                            case 1:
+                            if (center_left_free)
+                            {
+                                target_buffer[y * i_screen_width + x] = target_buffer[y * i_screen_width + x - 1];
+                                target_buffer[y * i_screen_width + x - 1] = color;
+                                not_moved = false;
+                            }
+                            break;
+
+                            case 2:
+                            case 3:
+                            if (center_right_free)
+                            {
+                                target_buffer[y * i_screen_width + x] = target_buffer[y * i_screen_width + x + 1];
+                                target_buffer[y * i_screen_width + x + 1] = color;
+                                not_moved = false;
+                            }
+                            break;
+
+                            case 4:
+                            if (left_free)
+                            {
+                                target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x - 1];
+                                target_buffer[(y + 1) * i_screen_width + x - 1] = color;
+                                not_moved = false;
+                            }
+                            break;
+
+                            case 5:
+                            if (center_free)
+                            {
+                                target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x];
+                                target_buffer[(y + 1) * i_screen_width + x] = color;
+                                not_moved = false;
+                            }
+                            break;
+
+                            case 6:
+                            if (right_free)
+                            {
+                                target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x + 1];
+                                target_buffer[(y + 1) * i_screen_width + x + 1] = color;
+                                not_moved = false;
+                            }
+                            break;
+
+                            case 7:
+                            not_moved = false;
+                            break;
+                            }
                         }
                     }
                 }
