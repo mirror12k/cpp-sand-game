@@ -55,21 +55,24 @@ void process_input(uint32_t* sand)
     int x, y;
     SDL_GetMouseState(&x, &y);
 
-    if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(1))
+    uint8_t mouse_state = SDL_GetMouseState(NULL, NULL);
+
+    if (mouse_state & SDL_BUTTON(SDL_BUTTON_LEFT))
     {
-        for (int p_x = x - 10; p_x <= x + 10; p_x++)
-            for (int p_y = y - 10; p_y <= y + 10; p_y++)
+        for (int p_x = x - brush_size; p_x <= x + brush_size; p_x++)
+            for (int p_y = y - brush_size; p_y <= y + brush_size; p_y++)
                 if (p_x > 0 && p_x < i_screen_width - 1 && p_y > 0 && p_y < i_screen_height - 1)
                     sand[p_y * i_screen_width + p_x] = current_brush;
     }
 
-    if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(3))
+    if (mouse_state & SDL_BUTTON(SDL_BUTTON_RIGHT))
     {
-        for (int p_x = x - 10; p_x <= x + 10; p_x++)
-            for (int p_y = y - 10; p_y <= y + 10; p_y++)
+        for (int p_x = x - brush_size; p_x <= x + brush_size; p_x++)
+            for (int p_y = y - brush_size; p_y <= y + brush_size; p_y++)
                 if (p_x > 0 && p_x < i_screen_width - 1 && p_y > 0 && p_y < i_screen_height - 1)
                     sand[p_y * i_screen_width + p_x] = color_black;
     }
+
 
 	uint8_t* keys = SDL_GetKeyState(NULL);
 	if (keys[SDLK_ESCAPE])
@@ -78,6 +81,12 @@ void process_input(uint32_t* sand)
 		current_brush = color_water;
 	if (keys[SDLK_2])
 		current_brush = color_sand;
+	if (keys[SDLK_p])
+        if (++brush_size > 100)
+            brush_size = 100;
+	if (keys[SDLK_o])
+        if (--brush_size < 1)
+            brush_size = 1;
 }
 
 
@@ -368,7 +377,7 @@ int main (int argc, char** argv)
         bitmap = swap_bitmap;
         swap_bitmap = swap_val;
 
-        cout << "frame" << endl;
+//        cout << "frame" << endl;
         // draw the sand buffer on screen
         draw_bitmap(srf_backbuffer, i_screen_width, i_screen_height, bitmap);
 
