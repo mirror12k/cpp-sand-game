@@ -18,9 +18,18 @@ using std::endl;
 bool b_close_requested = false;
 
 
+size_t i_screen_width = 800;
+size_t i_screen_height = 600;
 
 
-uint32_t color_border, color_sand, color_black;
+
+
+uint32_t color_black, color_border, color_sand, color_water;
+
+
+
+uint32_t current_brush;
+size_t brush_size = 10;
 
 
 
@@ -38,6 +47,8 @@ void draw_bitmap(SDL_Surface* surf, int max_x, int max_y, uint32_t* bitmap)
 }
 
 
+
+
 void process_input(uint32_t* sand)
 {
 
@@ -48,18 +59,25 @@ void process_input(uint32_t* sand)
     {
         for (int p_x = x - 10; p_x <= x + 10; p_x++)
             for (int p_y = y - 10; p_y <= y + 10; p_y++)
-                if (p_x > 0 && p_x < 800 - 1 && p_y > 0 && p_y < 600 - 1)
-                    sand[p_y * 800 + p_x] = color_sand;
+                if (p_x > 0 && p_x < i_screen_width - 1 && p_y > 0 && p_y < i_screen_height - 1)
+                    sand[p_y * i_screen_width + p_x] = current_brush;
     }
 
     if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(3))
     {
         for (int p_x = x - 10; p_x <= x + 10; p_x++)
             for (int p_y = y - 10; p_y <= y + 10; p_y++)
-                if (p_x > 0 && p_x < 800 - 1 && p_y > 0 && p_y < 600 - 1)
-                    sand[p_y * 800 + p_x] = color_black;
+                if (p_x > 0 && p_x < i_screen_width - 1 && p_y > 0 && p_y < i_screen_height - 1)
+                    sand[p_y * i_screen_width + p_x] = color_black;
     }
 
+	uint8_t* keys = SDL_GetKeyState(NULL);
+	if (keys[SDLK_ESCAPE])
+		b_close_requested = true;
+	if (keys[SDLK_1])
+		current_brush = color_water;
+	if (keys[SDLK_2])
+		current_brush = color_sand;
 }
 
 
@@ -82,24 +100,26 @@ void process_events ()
 
 void run_sand (uint32_t* sand, uint32_t* target_buffer)
 {
-    memcpy(target_buffer, sand, 800 * 600 * 4);
+    memcpy(target_buffer, sand, i_screen_width * i_screen_height * 4);
 
-    for (int y = 1; y < 600 - 1; y++)
+    for (int y = 1; y < i_screen_height - 1; y++)
     {
-        for (int x = 1; x < 800 - 1; x++)
+        for (int x = 1; x < i_screen_width - 1; x++)
         {
-            if (rand() % 10000 == 0)
-            {
-                target_buffer[y * 800 + x] = color_sand;
-            }
+//            if (rand() % 10000 == 0)
+//            {
+//                target_buffer[y * i_screen_width + x] = color_sand;
+//            }
 
-            uint32_t color = sand[y * 800 + x];
-            if (color != color_black)
+            uint32_t color = sand[y * i_screen_width + x];
+            if (color == color_sand)
             {
-                bool left_free = target_buffer[(y + 1) * 800 + x - 1] == color_black;
-                bool center_free = target_buffer[(y + 1) * 800 + x] == color_black;
-                bool right_free = target_buffer[(y + 1) * 800 + x + 1] == color_black;
-
+                bool left_free = target_buffer[(y + 1) * i_screen_width + x - 1] == color_black ||
+                    target_buffer[(y + 1) * i_screen_width + x - 1] == color_water;
+                bool center_free = target_buffer[(y + 1) * i_screen_width + x] == color_black ||
+                    target_buffer[(y + 1) * i_screen_width + x] == color_water;
+                bool right_free = target_buffer[(y + 1) * i_screen_width + x + 1] == color_black ||
+                    target_buffer[(y + 1) * i_screen_width + x + 1] == color_water;
 
                 if (left_free || center_free || right_free)
                 {
@@ -108,8 +128,8 @@ void run_sand (uint32_t* sand, uint32_t* target_buffer)
                     case 0:
                     if (left_free)
                     {
-                        target_buffer[y * 800 + x] = color_black;
-                        target_buffer[(y + 1) * 800 + x - 1] = color;
+                        target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x - 1];
+                        target_buffer[(y + 1) * i_screen_width + x - 1] = color;
                     }
                     else
                     {
@@ -118,25 +138,25 @@ void run_sand (uint32_t* sand, uint32_t* target_buffer)
                         case 0:
                         if (center_free)
                         {
-                            target_buffer[y * 800 + x] = color_black;
-                            target_buffer[(y + 1) * 800 + x] = color;
+                            target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x];
+                            target_buffer[(y + 1) * i_screen_width + x] = color;
                         }
                         else
                         {
-                            target_buffer[y * 800 + x] = color_black;
-                            target_buffer[(y + 1) * 800 + x + 1] = color;
+                            target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x + 1];
+                            target_buffer[(y + 1) * i_screen_width + x + 1] = color;
                         }
                         break;
                         case 1:
                         if (right_free)
                         {
-                            target_buffer[y * 800 + x] = color_black;
-                            target_buffer[(y + 1) * 800 + x + 1] = color;
+                            target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x + 1];
+                            target_buffer[(y + 1) * i_screen_width + x + 1] = color;
                         }
                         else
                         {
-                            target_buffer[y * 800 + x] = color_black;
-                            target_buffer[(y + 1) * 800 + x] = color;
+                            target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x];
+                            target_buffer[(y + 1) * i_screen_width + x] = color;
                         }
                         break;
                         }
@@ -146,8 +166,8 @@ void run_sand (uint32_t* sand, uint32_t* target_buffer)
                     case 1:
                     if (center_free)
                     {
-                        target_buffer[y * 800 + x] = color_black;
-                        target_buffer[(y + 1) * 800 + x] = color;
+                        target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x];
+                        target_buffer[(y + 1) * i_screen_width + x] = color;
                     }
                     else
                     {
@@ -156,25 +176,25 @@ void run_sand (uint32_t* sand, uint32_t* target_buffer)
                         case 0:
                         if (left_free)
                         {
-                            target_buffer[y * 800 + x] = color_black;
-                            target_buffer[(y + 1) * 800 + x - 1] = color;
+                            target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x - 1];
+                            target_buffer[(y + 1) * i_screen_width + x - 1] = color;
                         }
                         else
                         {
-                            target_buffer[y * 800 + x] = color_black;
-                            target_buffer[(y + 1) * 800 + x + 1] = color;
+                            target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x + 1];
+                            target_buffer[(y + 1) * i_screen_width + x + 1] = color;
                         }
                         break;
                         case 1:
                         if (right_free)
                         {
-                            target_buffer[y * 800 + x] = color_black;
-                            target_buffer[(y + 1) * 800 + x + 1] = color;
+                            target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x + 1];
+                            target_buffer[(y + 1) * i_screen_width + x + 1] = color;
                         }
                         else
                         {
-                            target_buffer[y * 800 + x] = color_black;
-                            target_buffer[(y + 1) * 800 + x - 1] = color;
+                            target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x - 1];
+                            target_buffer[(y + 1) * i_screen_width + x - 1] = color;
                         }
                         break;
                         }
@@ -184,8 +204,8 @@ void run_sand (uint32_t* sand, uint32_t* target_buffer)
                     case 2:
                     if (right_free)
                     {
-                        target_buffer[y * 800 + x] = color_black;
-                        target_buffer[(y + 1) * 800 + x + 1] = color;
+                        target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x + 1];
+                        target_buffer[(y + 1) * i_screen_width + x + 1] = color;
                     }
                     else
                     {
@@ -194,30 +214,99 @@ void run_sand (uint32_t* sand, uint32_t* target_buffer)
                         case 0:
                         if (left_free)
                         {
-                            target_buffer[y * 800 + x] = color_black;
-                            target_buffer[(y + 1) * 800 + x - 1] = color;
+                            target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x - 1];
+                            target_buffer[(y + 1) * i_screen_width + x - 1] = color;
                         }
                         else
                         {
-                            target_buffer[y * 800 + x] = color_black;
-                            target_buffer[(y + 1) * 800 + x] = color;
+                            target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x];
+                            target_buffer[(y + 1) * i_screen_width + x] = color;
                         }
                         break;
                         case 1:
                         if (center_free)
                         {
-                            target_buffer[y * 800 + x] = color_black;
-                            target_buffer[(y + 1) * 800 + x] = color;
+                            target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x];
+                            target_buffer[(y + 1) * i_screen_width + x] = color;
                         }
                         else
                         {
-                            target_buffer[y * 800 + x] = color_black;
-                            target_buffer[(y + 1) * 800 + x - 1] = color;
+                            target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x - 1];
+                            target_buffer[(y + 1) * i_screen_width + x - 1] = color;
                         }
                         break;
                         }
                     }
                     break;
+                    }
+                }
+            }
+            else if (color == color_water)
+            {
+
+                bool left_free = target_buffer[(y + 1) * i_screen_width + x - 1] == color_black;
+                bool center_free = target_buffer[(y + 1) * i_screen_width + x] == color_black;
+                bool right_free = target_buffer[(y + 1) * i_screen_width + x + 1] == color_black;
+                bool center_left_free = target_buffer[y * i_screen_width + x - 1] == color_black;
+                bool center_right_free = target_buffer[y * i_screen_width + x + 1] == color_black;
+                if (left_free || center_free || right_free || center_left_free || center_right_free)
+                {
+                    bool not_moved = true;
+                    while (not_moved)
+                    {
+                        switch (rand() % 8)
+                        {
+                        case 0:
+                        case 1:
+                        if (center_left_free)
+                        {
+                            target_buffer[y * i_screen_width + x] = color_black;
+                            target_buffer[y * i_screen_width + x - 1] = color;
+                            not_moved = false;
+                        }
+                        break;
+
+                        case 2:
+                        case 3:
+                        if (center_right_free)
+                        {
+                            target_buffer[y * i_screen_width + x] = color_black;
+                            target_buffer[y * i_screen_width + x + 1] = color;
+                            not_moved = false;
+                        }
+                        break;
+
+                        case 4:
+                        if (left_free)
+                        {
+                            target_buffer[y * i_screen_width + x] = color_black;
+                            target_buffer[(y + 1) * i_screen_width + x - 1] = color;
+                            not_moved = false;
+                        }
+                        break;
+
+                        case 5:
+                        if (center_free)
+                        {
+                            target_buffer[y * i_screen_width + x] = color_black;
+                            target_buffer[(y + 1) * i_screen_width + x] = color;
+                            not_moved = false;
+                        }
+                        break;
+
+                        case 6:
+                        if (right_free)
+                        {
+                            target_buffer[y * i_screen_width + x] = color_black;
+                            target_buffer[(y + 1) * i_screen_width + x + 1] = color;
+                            not_moved = false;
+                        }
+                        break;
+
+                        case 7:
+                        not_moved = false;
+                        break;
+                        }
                     }
                 }
             }
@@ -237,29 +326,32 @@ int main (int argc, char** argv)
     uint32_t i_video_options = 0;
     i_video_options |= SDL_SWSURFACE;
 
-    SDL_Surface* srf_backbuffer = SDL_SetVideoMode(800, 600, 32, i_video_options);
+    SDL_Surface* srf_backbuffer = SDL_SetVideoMode(i_screen_width, i_screen_height, 32, i_video_options);
 
     color_black = SDL_MapRGB(srf_backbuffer->format, 0, 0, 0);
     color_border = SDL_MapRGB(srf_backbuffer->format, 255, 255, 255);
-    color_sand = SDL_MapRGB(srf_backbuffer->format, 230, 200, 180);
+    color_sand = SDL_MapRGB(srf_backbuffer->format, 200, 100, 50);
+    color_water = SDL_MapRGB(srf_backbuffer->format, 50, 50, 128);
 
-    uint32_t* bitmap = (uint32_t*)malloc(800 * 600 * 4);
-    uint32_t* swap_bitmap = (uint32_t*)malloc(800 * 600 * 4);
+    current_brush = color_sand;
 
-    for (uint y = 0; y < 600; y++)
-        for (uint x = 0; x < 800; x++)
-            bitmap[y * 800 + x] = color_black;
+    uint32_t* bitmap = (uint32_t*)malloc(i_screen_width * i_screen_height * 4);
+    uint32_t* swap_bitmap = (uint32_t*)malloc(i_screen_width * i_screen_height * 4);
+
+    for (uint y = 0; y < i_screen_height; y++)
+        for (uint x = 0; x < i_screen_width; x++)
+            bitmap[y * i_screen_width + x] = color_black;
 
 
-    for (uint y = 0; y < 600; y++)
+    for (uint y = 0; y < i_screen_height; y++)
     {
-        bitmap[y * 800] = color_border;
-        bitmap[y * 800 + 800 - 1] = color_border;
+        bitmap[y * i_screen_width] = color_border;
+        bitmap[y * i_screen_width + i_screen_width - 1] = color_border;
     }
-    for (uint x = 0; x < 800; x++)
+    for (uint x = 0; x < i_screen_width; x++)
     {
         bitmap[x] = color_border;
-        bitmap[(600 - 1) * 800 + x] = color_border;
+        bitmap[(i_screen_height - 1) * i_screen_width + x] = color_border;
     }
 
     int i = 0;
@@ -278,10 +370,10 @@ int main (int argc, char** argv)
 
         cout << "frame" << endl;
         // draw the sand buffer on screen
-        draw_bitmap(srf_backbuffer, 800, 600, bitmap);
+        draw_bitmap(srf_backbuffer, i_screen_width, i_screen_height, bitmap);
 
-		SDL_Flip(srf_backbuffer);
 		SDL_Delay(15);
+		SDL_Flip(srf_backbuffer);
     }
 
 	SDL_Quit();
