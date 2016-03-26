@@ -56,141 +56,271 @@ void process_events ()
 }
 
 
-void run_sand (uint32_t* sand)
+void run_sand (uint32_t* sand, uint32_t* target_buffer)
 {
-    for (int y = 600 - 2; y > 1; y--)
+    memcpy(target_buffer, sand, 800 * 600 * 4);
+
+    for (int y = 1; y < 600 - 1; y++)
     {
         for (int x = 1; x < 800 - 1; x++)
         {
             if (rand() % 10000 == 0)
             {
-                sand[y * 800 + x] = color_sand;
+                target_buffer[y * 800 + x] = color_sand;
             }
-            bool left_free = sand[(y + 1) * 800 + x - 1] == color_black;
-            bool center_free = sand[(y + 1) * 800 + x] == color_black;
-            bool right_free = sand[(y + 1) * 800 + x + 1] == color_black;
-            if (sand[y * 800 + x] != color_black && sand[y * 800 + x] != color_border &&
-                (left_free || center_free || right_free))
+
+            uint32_t color = sand[y * 800 + x];
+            if (color != color_black)
             {
-                uint32_t color = sand[y * 800 + x];
+                bool left_free = target_buffer[(y + 1) * 800 + x - 1] == color_black;
+                bool center_free = target_buffer[(y + 1) * 800 + x] == color_black;
+                bool right_free = target_buffer[(y + 1) * 800 + x + 1] == color_black;
 
-                switch (rand() % 3)
-                {
-                case 0:
-                if (left_free)
-                {
-                    sand[y * 800 + x] = color_black;
-                    sand[(y + 1) * 800 + x - 1] = color;
-                }
-                else
-                {
-                    switch (rand() % 2)
-                    {
-                    case 0:
-                    if (center_free)
-                    {
-                        sand[y * 800 + x] = color_black;
-                        sand[(y + 1) * 800 + x] = color;
-                    }
-                    else
-                    {
-                        sand[y * 800 + x] = color_black;
-                        sand[(y + 1) * 800 + x + 1] = color;
-                    }
-                    break;
-                    case 1:
-                    if (right_free)
-                    {
-                        sand[y * 800 + x] = color_black;
-                        sand[(y + 1) * 800 + x + 1] = color;
-                    }
-                    else
-                    {
-                        sand[y * 800 + x] = color_black;
-                        sand[(y + 1) * 800 + x] = color;
-                    }
-                    break;
-                    }
-                }
-                break;
 
-                case 1:
-                if (center_free)
+                if (left_free || center_free || right_free)
                 {
-                    sand[y * 800 + x] = color_black;
-                    sand[(y + 1) * 800 + x] = color;
-                }
-                else
-                {
-                    switch (rand() % 2)
+//                    target_buffer[y * 800 + x] = color_black;
+//                    target_buffer[(y + 1) * 800 + x] = color;
+                    switch (rand() % 3)
                     {
                     case 0:
                     if (left_free)
                     {
-                        sand[y * 800 + x] = color_black;
-                        sand[(y + 1) * 800 + x - 1] = color;
+                        target_buffer[y * 800 + x] = color_black;
+                        target_buffer[(y + 1) * 800 + x - 1] = color;
                     }
                     else
                     {
-                        sand[y * 800 + x] = color_black;
-                        sand[(y + 1) * 800 + x + 1] = color;
+                        switch (rand() % 2)
+                        {
+                        case 0:
+                        if (center_free)
+                        {
+                            target_buffer[y * 800 + x] = color_black;
+                            target_buffer[(y + 1) * 800 + x] = color;
+                        }
+                        else
+                        {
+                            target_buffer[y * 800 + x] = color_black;
+                            target_buffer[(y + 1) * 800 + x + 1] = color;
+                        }
+                        break;
+                        case 1:
+                        if (right_free)
+                        {
+                            target_buffer[y * 800 + x] = color_black;
+                            target_buffer[(y + 1) * 800 + x + 1] = color;
+                        }
+                        else
+                        {
+                            target_buffer[y * 800 + x] = color_black;
+                            target_buffer[(y + 1) * 800 + x] = color;
+                        }
+                        break;
+                        }
                     }
                     break;
-                    case 1:
-                    if (right_free)
-                    {
-                        sand[y * 800 + x] = color_black;
-                        sand[(y + 1) * 800 + x + 1] = color;
-                    }
-                    else
-                    {
-                        sand[y * 800 + x] = color_black;
-                        sand[(y + 1) * 800 + x - 1] = color;
-                    }
-                    break;
-                    }
-                }
-                break;
 
-                case 2:
-                if (right_free)
-                {
-                    sand[y * 800 + x] = color_black;
-                    sand[(y + 1) * 800 + x + 1] = color;
-                }
-                else
-                {
-                    switch (rand() % 2)
-                    {
-                    case 0:
-                    if (left_free)
-                    {
-                        sand[y * 800 + x] = color_black;
-                        sand[(y + 1) * 800 + x - 1] = color;
-                    }
-                    else
-                    {
-                        sand[y * 800 + x] = color_black;
-                        sand[(y + 1) * 800 + x] = color;
-                    }
-                    break;
                     case 1:
                     if (center_free)
                     {
-                        sand[y * 800 + x] = color_black;
-                        sand[(y + 1) * 800 + x] = color;
+                        target_buffer[y * 800 + x] = color_black;
+                        target_buffer[(y + 1) * 800 + x] = color;
                     }
                     else
                     {
-                        sand[y * 800 + x] = color_black;
-                        sand[(y + 1) * 800 + x - 1] = color;
+                        switch (rand() % 2)
+                        {
+                        case 0:
+                        if (left_free)
+                        {
+                            target_buffer[y * 800 + x] = color_black;
+                            target_buffer[(y + 1) * 800 + x - 1] = color;
+                        }
+                        else
+                        {
+                            target_buffer[y * 800 + x] = color_black;
+                            target_buffer[(y + 1) * 800 + x + 1] = color;
+                        }
+                        break;
+                        case 1:
+                        if (right_free)
+                        {
+                            target_buffer[y * 800 + x] = color_black;
+                            target_buffer[(y + 1) * 800 + x + 1] = color;
+                        }
+                        else
+                        {
+                            target_buffer[y * 800 + x] = color_black;
+                            target_buffer[(y + 1) * 800 + x - 1] = color;
+                        }
+                        break;
+                        }
+                    }
+                    break;
+
+                    case 2:
+                    if (right_free)
+                    {
+                        target_buffer[y * 800 + x] = color_black;
+                        target_buffer[(y + 1) * 800 + x + 1] = color;
+                    }
+                    else
+                    {
+                        switch (rand() % 2)
+                        {
+                        case 0:
+                        if (left_free)
+                        {
+                            target_buffer[y * 800 + x] = color_black;
+                            target_buffer[(y + 1) * 800 + x - 1] = color;
+                        }
+                        else
+                        {
+                            target_buffer[y * 800 + x] = color_black;
+                            target_buffer[(y + 1) * 800 + x] = color;
+                        }
+                        break;
+                        case 1:
+                        if (center_free)
+                        {
+                            target_buffer[y * 800 + x] = color_black;
+                            target_buffer[(y + 1) * 800 + x] = color;
+                        }
+                        else
+                        {
+                            target_buffer[y * 800 + x] = color_black;
+                            target_buffer[(y + 1) * 800 + x - 1] = color;
+                        }
+                        break;
+                        }
                     }
                     break;
                     }
-                }
-                break;
                 }
             }
+//            if (sand[y * 800 + x] != color_black && sand[y * 800 + x] != color_border &&
+//                (left_free || center_free || right_free))
+//            {
+//                uint32_t color = sand[y * 800 + x];
+//
+//                switch (rand() % 3)
+//                {
+//                case 0:
+//                if (left_free)
+//                {
+//                    sand[y * 800 + x] = color_black;
+//                    sand[(y + 1) * 800 + x - 1] = color;
+//                }
+//                else
+//                {
+//                    switch (rand() % 2)
+//                    {
+//                    case 0:
+//                    if (center_free)
+//                    {
+//                        sand[y * 800 + x] = color_black;
+//                        sand[(y + 1) * 800 + x] = color;
+//                    }
+//                    else
+//                    {
+//                        sand[y * 800 + x] = color_black;
+//                        sand[(y + 1) * 800 + x + 1] = color;
+//                    }
+//                    break;
+//                    case 1:
+//                    if (right_free)
+//                    {
+//                        sand[y * 800 + x] = color_black;
+//                        sand[(y + 1) * 800 + x + 1] = color;
+//                    }
+//                    else
+//                    {
+//                        sand[y * 800 + x] = color_black;
+//                        sand[(y + 1) * 800 + x] = color;
+//                    }
+//                    break;
+//                    }
+//                }
+//                break;
+//
+//                case 1:
+//                if (center_free)
+//                {
+//                    sand[y * 800 + x] = color_black;
+//                    sand[(y + 1) * 800 + x] = color;
+//                }
+//                else
+//                {
+//                    switch (rand() % 2)
+//                    {
+//                    case 0:
+//                    if (left_free)
+//                    {
+//                        sand[y * 800 + x] = color_black;
+//                        sand[(y + 1) * 800 + x - 1] = color;
+//                    }
+//                    else
+//                    {
+//                        sand[y * 800 + x] = color_black;
+//                        sand[(y + 1) * 800 + x + 1] = color;
+//                    }
+//                    break;
+//                    case 1:
+//                    if (right_free)
+//                    {
+//                        sand[y * 800 + x] = color_black;
+//                        sand[(y + 1) * 800 + x + 1] = color;
+//                    }
+//                    else
+//                    {
+//                        sand[y * 800 + x] = color_black;
+//                        sand[(y + 1) * 800 + x - 1] = color;
+//                    }
+//                    break;
+//                    }
+//                }
+//                break;
+//
+//                case 2:
+//                if (right_free)
+//                {
+//                    sand[y * 800 + x] = color_black;
+//                    sand[(y + 1) * 800 + x + 1] = color;
+//                }
+//                else
+//                {
+//                    switch (rand() % 2)
+//                    {
+//                    case 0:
+//                    if (left_free)
+//                    {
+//                        sand[y * 800 + x] = color_black;
+//                        sand[(y + 1) * 800 + x - 1] = color;
+//                    }
+//                    else
+//                    {
+//                        sand[y * 800 + x] = color_black;
+//                        sand[(y + 1) * 800 + x] = color;
+//                    }
+//                    break;
+//                    case 1:
+//                    if (center_free)
+//                    {
+//                        sand[y * 800 + x] = color_black;
+//                        sand[(y + 1) * 800 + x] = color;
+//                    }
+//                    else
+//                    {
+//                        sand[y * 800 + x] = color_black;
+//                        sand[(y + 1) * 800 + x - 1] = color;
+//                    }
+//                    break;
+//                    }
+//                }
+//                break;
+//                }
+//            }
         }
     }
 }
@@ -214,6 +344,7 @@ int main (int argc, char** argv)
     color_sand = SDL_MapRGB(srf_backbuffer->format, 230, 200, 180);
 
     uint32_t* bitmap = (uint32_t*)malloc(800 * 600 * 4);
+    uint32_t* swap_bitmap = (uint32_t*)malloc(800 * 600 * 4);
 
     for (uint y = 0; y < 600; y++)
         for (uint x = 0; x < 800; x++)
@@ -237,7 +368,10 @@ int main (int argc, char** argv)
     {
         process_events();
 
-        run_sand(bitmap);
+        run_sand(bitmap, swap_bitmap);
+        uint32_t* swap_val = bitmap;
+        bitmap = swap_bitmap;
+        swap_bitmap = swap_val;
 
         cout << "frame" << endl;
         draw_bitmap(srf_backbuffer, 800, 600, bitmap);
