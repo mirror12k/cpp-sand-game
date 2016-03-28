@@ -35,14 +35,16 @@ size_t i_screen_height = 600;
 
 
 
-uint32_t color_black, color_border, color_sand, color_water, color_oil, color_stone;
+uint32_t color_black, color_border,
+    color_sand, color_stone,
+    color_water, color_oil, color_acid;
 
 
 
 uint32_t current_brush;
 size_t brush_size = 10;
 
-uint32_t brush_color_1, brush_color_2, brush_color_3, brush_color_4;
+uint32_t brush_color_1, brush_color_2, brush_color_3, brush_color_4, brush_color_5, brush_color_6, brush_color_7, brush_color_8;
 
 
 
@@ -98,6 +100,14 @@ void process_input(uint32_t* sand)
 		current_brush = brush_color_3;
 	if (keys[SDLK_4])
 		current_brush = brush_color_4;
+	if (keys[SDLK_5])
+		current_brush = brush_color_5;
+	if (keys[SDLK_6])
+		current_brush = brush_color_6;
+	if (keys[SDLK_7])
+		current_brush = brush_color_7;
+	if (keys[SDLK_8])
+		current_brush = brush_color_8;
 	if (keys[SDLK_p])
         if (++brush_size > 100)
             brush_size = 100;
@@ -132,6 +142,8 @@ int get_pixel_weight(uint32_t color)
         return 500;
     else if (color == color_oil)
         return 300;
+    else if (color == color_acid)
+        return 500;
     else if (color == color_black)
         return 0;
     else
@@ -287,30 +299,85 @@ void run_sand (uint32_t* sand, uint32_t* target_buffer)
                 {
                     int weight = get_pixel_weight(color);
 
+                    bool top_left_free = (! IS_PIXEL_SOLID(target_buffer[(y - 1) * i_screen_width + x - 1])) &&
+                        target_buffer[(y - 1) * i_screen_width + x - 1] != color &&
+                        (get_pixel_weight(target_buffer[(y - 1) * i_screen_width + x - 1]) > weight ||
+                            (get_pixel_weight(target_buffer[(y - 1) * i_screen_width + x - 1]) == weight && rand() % 4 == 0)
+                        );
+                    bool top_center_free = (! IS_PIXEL_SOLID(target_buffer[(y - 1) * i_screen_width + x])) &&
+                        target_buffer[(y - 1) * i_screen_width + x] != color &&
+                        (get_pixel_weight(target_buffer[(y - 1) * i_screen_width + x]) > weight ||
+                            (get_pixel_weight(target_buffer[(y - 1) * i_screen_width + x]) == weight && rand() % 4 == 0)
+                        );
+                    bool top_right_free = (! IS_PIXEL_SOLID(target_buffer[(y - 1) * i_screen_width + x + 1])) &&
+                        target_buffer[(y - 1) * i_screen_width + x + 1] != color &&
+                        (get_pixel_weight(target_buffer[(y - 1) * i_screen_width + x + 1]) > weight ||
+                            (get_pixel_weight(target_buffer[(y - 1) * i_screen_width + x + 1]) == weight && rand() % 4 == 0)
+                        );
+
                     bool left_free = (! IS_PIXEL_SOLID(target_buffer[(y + 1) * i_screen_width + x - 1])) &&
                         target_buffer[(y + 1) * i_screen_width + x - 1] != color &&
-                        get_pixel_weight(target_buffer[(y + 1) * i_screen_width + x - 1]) < weight;
+                        (get_pixel_weight(target_buffer[(y + 1) * i_screen_width + x - 1]) < weight ||
+                            (get_pixel_weight(target_buffer[(y + 1) * i_screen_width + x - 1]) == weight && rand() % 4 == 0)
+                        );
                     bool center_free = (! IS_PIXEL_SOLID(target_buffer[(y + 1) * i_screen_width + x])) &&
                         target_buffer[(y + 1) * i_screen_width + x] != color &&
-                        get_pixel_weight(target_buffer[(y + 1) * i_screen_width + x]) < weight;
+                        (get_pixel_weight(target_buffer[(y + 1) * i_screen_width + x]) < weight ||
+                            (get_pixel_weight(target_buffer[(y + 1) * i_screen_width + x]) == weight && rand() % 4 == 0)
+                        );
                     bool right_free = (! IS_PIXEL_SOLID(target_buffer[(y + 1) * i_screen_width + x + 1])) &&
                         target_buffer[(y + 1) * i_screen_width + x + 1] != color &&
-                        get_pixel_weight(target_buffer[(y + 1) * i_screen_width + x + 1]) < weight;
+                        (get_pixel_weight(target_buffer[(y + 1) * i_screen_width + x + 1]) < weight ||
+                            (get_pixel_weight(target_buffer[(y + 1) * i_screen_width + x + 1]) == weight && rand() % 4 == 0)
+                        );
+
                     bool center_left_free = (! IS_PIXEL_SOLID(target_buffer[y * i_screen_width + x - 1])) &&
-                        target_buffer[y * i_screen_width + x - 1] != color;
+                        target_buffer[y * i_screen_width + x - 1] != color &&
+                        (get_pixel_weight(target_buffer[y * i_screen_width + x - 1]) < weight ||
+                            (get_pixel_weight(target_buffer[y * i_screen_width + x - 1]) == weight && rand() % 4 == 0)
+                        );
                     bool center_right_free = (! IS_PIXEL_SOLID(target_buffer[y * i_screen_width + x + 1])) &&
-                        target_buffer[y * i_screen_width + x + 1] != color;
+                        target_buffer[y * i_screen_width + x + 1] != color &&
+                        (get_pixel_weight(target_buffer[y * i_screen_width + x + 1]) < weight ||
+                            (get_pixel_weight(target_buffer[y * i_screen_width + x + 1]) == weight && rand() % 4 == 0)
+                        );
 
 
-                    if (left_free || center_free || right_free || center_left_free || center_right_free)
+                    if (left_free || center_free || right_free ||
+                        top_left_free || top_center_free || top_right_free ||
+                        center_left_free || center_right_free)
+//                         && rand() % 4 == 0))
                     {
                         bool not_moved = true;
                         while (not_moved)
                         {
-                            switch (rand() % 8)
+                            switch (rand() % 9)
                             {
                             case 0:
+                            if (top_left_free)
+                            {
+                                target_buffer[y * i_screen_width + x] = target_buffer[(y - 1) * i_screen_width + x - 1];
+                                target_buffer[(y - 1) * i_screen_width + x - 1] = color;
+                                not_moved = false;
+                            }
+                            break;
                             case 1:
+                            if (top_center_free)
+                            {
+                                target_buffer[y * i_screen_width + x] = target_buffer[(y - 1) * i_screen_width + x];
+                                target_buffer[(y - 1) * i_screen_width + x] = color;
+                                not_moved = false;
+                            }
+                            break;
+                            case 2:
+                            if (top_right_free)
+                            {
+                                target_buffer[y * i_screen_width + x] = target_buffer[(y - 1) * i_screen_width + x + 1];
+                                target_buffer[(y - 1) * i_screen_width + x + 1] = color;
+                                not_moved = false;
+                            }
+                            break;
+                            case 3:
                             if (center_left_free)
                             {
                                 target_buffer[y * i_screen_width + x] = target_buffer[y * i_screen_width + x - 1];
@@ -318,9 +385,7 @@ void run_sand (uint32_t* sand, uint32_t* target_buffer)
                                 not_moved = false;
                             }
                             break;
-
-                            case 2:
-                            case 3:
+                            case 4:
                             if (center_right_free)
                             {
                                 target_buffer[y * i_screen_width + x] = target_buffer[y * i_screen_width + x + 1];
@@ -329,7 +394,7 @@ void run_sand (uint32_t* sand, uint32_t* target_buffer)
                             }
                             break;
 
-                            case 4:
+                            case 5:
                             if (left_free)
                             {
                                 target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x - 1];
@@ -338,7 +403,7 @@ void run_sand (uint32_t* sand, uint32_t* target_buffer)
                             }
                             break;
 
-                            case 5:
+                            case 6:
                             if (center_free)
                             {
                                 target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x];
@@ -347,7 +412,7 @@ void run_sand (uint32_t* sand, uint32_t* target_buffer)
                             }
                             break;
 
-                            case 6:
+                            case 7:
                             if (right_free)
                             {
                                 target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x + 1];
@@ -356,7 +421,7 @@ void run_sand (uint32_t* sand, uint32_t* target_buffer)
                             }
                             break;
 
-                            case 7:
+                            case 8:
                             not_moved = false;
                             break;
                             }
@@ -387,7 +452,8 @@ int main (int argc, char** argv)
     color_border = MAKE_PIXEL_SOLID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 255, 255, 255)));
     color_sand = MAKE_PIXEL_SAND(MAKE_PIXEL_SOLID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 200, 100, 50))));
     color_water = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 50, 50, 128)));
-    color_oil = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 100, 128, 50)));
+    color_oil = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 100, 128, 80)));
+    color_acid = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 230, 30, 100)));
     color_stone = MAKE_PIXEL_SOLID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 128, 128, 128)));
 
     current_brush = color_sand;
@@ -396,6 +462,7 @@ int main (int argc, char** argv)
     brush_color_2 = color_sand;
     brush_color_3 = color_oil;
     brush_color_4 = color_stone;
+    brush_color_5 = color_acid;
 
     uint32_t* bitmap = (uint32_t*)malloc(i_screen_width * i_screen_height * 4);
     uint32_t* swap_bitmap = (uint32_t*)malloc(i_screen_width * i_screen_height * 4);
