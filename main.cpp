@@ -37,7 +37,8 @@ size_t i_screen_height = 600;
 
 uint32_t color_black, color_border,
     color_sand, color_stone,
-    color_water, color_oil, color_acid;
+    color_water, color_oil, color_acid,
+    color_smoke, color_fire;
 
 
 
@@ -144,6 +145,10 @@ int get_pixel_weight(uint32_t color)
         return 300;
     else if (color == color_acid)
         return 500;
+    else if (color == color_smoke)
+        return -200;
+    else if (color == color_fire)
+        return -100;
     else if (color == color_black)
         return 0;
     else
@@ -337,15 +342,17 @@ void run_sand (uint32_t* sand, uint32_t* target_buffer)
                         );
 
                     bool center_left_free = (! IS_PIXEL_SOLID(*center_left)) &&
-                        *center_left != color &&
-                        (get_pixel_weight(*center_left) < weight ||
-                            (get_pixel_weight(*center_left) == weight && rand() % 4 == 0)
-                        );
+                        *center_left != color && (rand() % 3 == 0);
+//                         &&
+//                        (get_pixel_weight(*center_left) < weight ||
+//                            (get_pixel_weight(*center_left) == weight && rand() % 4 == 0)
+//                        );
                     bool center_right_free = (! IS_PIXEL_SOLID(*center_right)) &&
-                        *center_right != color &&
-                        (get_pixel_weight(*center_right) < weight ||
-                            (get_pixel_weight(*center_right) == weight && rand() % 4 == 0)
-                        );
+                        *center_right != color && (rand() % 3 == 0);
+//                         &&
+//                        (get_pixel_weight(*center_right) < weight ||
+//                            (get_pixel_weight(*center_right) == weight && rand() % 4 == 0)
+//                        );
 
 
                     if (left_free || center_free || right_free ||
@@ -469,6 +476,8 @@ int main (int argc, char** argv)
     color_oil = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 100, 128, 80)));
     color_acid = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 230, 30, 100)));
     color_stone = MAKE_PIXEL_SOLID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 128, 128, 128)));
+    color_smoke = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 30, 30, 30)));
+    color_fire = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 255, 128, 64)));
 
     current_brush = color_sand;
 
@@ -477,6 +486,8 @@ int main (int argc, char** argv)
     brush_color_3 = color_oil;
     brush_color_4 = color_stone;
     brush_color_5 = color_acid;
+    brush_color_6 = color_smoke;
+    brush_color_7 = color_fire;
 
     uint32_t* bitmap = (uint32_t*)malloc(i_screen_width * i_screen_height * 4);
     uint32_t* swap_bitmap = (uint32_t*)malloc(i_screen_width * i_screen_height * 4);
