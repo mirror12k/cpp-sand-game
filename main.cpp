@@ -155,25 +155,24 @@ void run_sand (uint32_t* sand, uint32_t* target_buffer)
 {
     memcpy(target_buffer, sand, i_screen_width * i_screen_height * 4);
 
+
+
     for (uint y = 1; y < i_screen_height - 1; y++)
     {
+        size_t top_left = 0 + i_screen_width * (y - 1), top_center = 1 + i_screen_width * (y - 1), top_right = 2 + i_screen_width * (y - 1);
+        size_t center_left = 0 + i_screen_width * y, center_center = 1 + i_screen_width * y, center_right = 2 + i_screen_width * y;
+        size_t bottom_left = 0 + i_screen_width * (y + 1), bottom_center = 1 + i_screen_width * (y + 1), bottom_right = 2 + i_screen_width * (y + 1);
+
         for (uint x = 1; x < i_screen_width - 1; x++)
         {
-            uint32_t color = sand[y * i_screen_width + x];
-            if (color == target_buffer[y * i_screen_width + x])
+            uint32_t color = sand[center_center];
+            if (color == target_buffer[center_center])
             {
                 if (IS_PIXEL_SAND(color))
                 {
-                    bool left_free = ! IS_PIXEL_SOLID(target_buffer[(y + 1) * i_screen_width + x - 1]);
-                    bool center_free = ! IS_PIXEL_SOLID(target_buffer[(y + 1) * i_screen_width + x]);
-                    bool right_free = ! IS_PIXEL_SOLID(target_buffer[(y + 1) * i_screen_width + x + 1]);
-//                        get_pixel_weight(target_buffer[(y + 1) * i_screen_width + x - 1]) < weight;
-//                    bool left_free = target_buffer[(y + 1) * i_screen_width + x - 1] == color_black ||
-//                        target_buffer[(y + 1) * i_screen_width + x - 1] == color_water;
-//                    bool center_free = target_buffer[(y + 1) * i_screen_width + x] == color_black ||
-//                        target_buffer[(y + 1) * i_screen_width + x] == color_water;
-//                    bool right_free = target_buffer[(y + 1) * i_screen_width + x + 1] == color_black ||
-//                        target_buffer[(y + 1) * i_screen_width + x + 1] == color_water;
+                    bool left_free = ! IS_PIXEL_SOLID(target_buffer[bottom_left]);
+                    bool center_free = ! IS_PIXEL_SOLID(target_buffer[bottom_center]);
+                    bool right_free = ! IS_PIXEL_SOLID(target_buffer[bottom_right]);
 
                     if (left_free || center_free || right_free)
                     {
@@ -182,8 +181,8 @@ void run_sand (uint32_t* sand, uint32_t* target_buffer)
                         case 0:
                         if (left_free)
                         {
-                            target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x - 1];
-                            target_buffer[(y + 1) * i_screen_width + x - 1] = color;
+                            target_buffer[center_center] = target_buffer[bottom_left];
+                            target_buffer[bottom_left] = color;
                         }
                         else
                         {
@@ -192,25 +191,25 @@ void run_sand (uint32_t* sand, uint32_t* target_buffer)
                             case 0:
                             if (center_free)
                             {
-                                target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x];
-                                target_buffer[(y + 1) * i_screen_width + x] = color;
+                                target_buffer[center_center] = target_buffer[bottom_center];
+                                target_buffer[bottom_center] = color;
                             }
                             else
                             {
-                                target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x + 1];
-                                target_buffer[(y + 1) * i_screen_width + x + 1] = color;
+                                target_buffer[center_center] = target_buffer[bottom_right];
+                                target_buffer[bottom_right] = color;
                             }
                             break;
                             case 1:
                             if (right_free)
                             {
-                                target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x + 1];
-                                target_buffer[(y + 1) * i_screen_width + x + 1] = color;
+                                target_buffer[center_center] = target_buffer[bottom_right];
+                                target_buffer[bottom_right] = color;
                             }
                             else
                             {
-                                target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x];
-                                target_buffer[(y + 1) * i_screen_width + x] = color;
+                                target_buffer[center_center] = target_buffer[bottom_center];
+                                target_buffer[bottom_center] = color;
                             }
                             break;
                             }
@@ -220,8 +219,8 @@ void run_sand (uint32_t* sand, uint32_t* target_buffer)
                         case 1:
                         if (center_free)
                         {
-                            target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x];
-                            target_buffer[(y + 1) * i_screen_width + x] = color;
+                            target_buffer[center_center] = target_buffer[bottom_center];
+                            target_buffer[bottom_center] = color;
                         }
                         else
                         {
@@ -230,25 +229,25 @@ void run_sand (uint32_t* sand, uint32_t* target_buffer)
                             case 0:
                             if (left_free)
                             {
-                                target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x - 1];
-                                target_buffer[(y + 1) * i_screen_width + x - 1] = color;
+                                target_buffer[center_center] = target_buffer[bottom_left];
+                                target_buffer[bottom_left] = color;
                             }
                             else
                             {
-                                target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x + 1];
-                                target_buffer[(y + 1) * i_screen_width + x + 1] = color;
+                                target_buffer[center_center] = target_buffer[bottom_right];
+                                target_buffer[bottom_right] = color;
                             }
                             break;
                             case 1:
                             if (right_free)
                             {
-                                target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x + 1];
-                                target_buffer[(y + 1) * i_screen_width + x + 1] = color;
+                                target_buffer[center_center] = target_buffer[bottom_right];
+                                target_buffer[bottom_right] = color;
                             }
                             else
                             {
-                                target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x - 1];
-                                target_buffer[(y + 1) * i_screen_width + x - 1] = color;
+                                target_buffer[center_center] = target_buffer[bottom_left];
+                                target_buffer[bottom_left] = color;
                             }
                             break;
                             }
@@ -258,8 +257,8 @@ void run_sand (uint32_t* sand, uint32_t* target_buffer)
                         case 2:
                         if (right_free)
                         {
-                            target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x + 1];
-                            target_buffer[(y + 1) * i_screen_width + x + 1] = color;
+                            target_buffer[center_center] = target_buffer[bottom_right];
+                            target_buffer[bottom_right] = color;
                         }
                         else
                         {
@@ -268,25 +267,25 @@ void run_sand (uint32_t* sand, uint32_t* target_buffer)
                             case 0:
                             if (left_free)
                             {
-                                target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x - 1];
-                                target_buffer[(y + 1) * i_screen_width + x - 1] = color;
+                                target_buffer[center_center] = target_buffer[bottom_left];
+                                target_buffer[bottom_left] = color;
                             }
                             else
                             {
-                                target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x];
-                                target_buffer[(y + 1) * i_screen_width + x] = color;
+                                target_buffer[center_center] = target_buffer[bottom_center];
+                                target_buffer[bottom_center] = color;
                             }
                             break;
                             case 1:
                             if (center_free)
                             {
-                                target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x];
-                                target_buffer[(y + 1) * i_screen_width + x] = color;
+                                target_buffer[center_center] = target_buffer[bottom_center];
+                                target_buffer[bottom_center] = color;
                             }
                             else
                             {
-                                target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x - 1];
-                                target_buffer[(y + 1) * i_screen_width + x - 1] = color;
+                                target_buffer[center_center] = target_buffer[bottom_left];
+                                target_buffer[bottom_left] = color;
                             }
                             break;
                             }
@@ -299,47 +298,47 @@ void run_sand (uint32_t* sand, uint32_t* target_buffer)
                 {
                     int weight = get_pixel_weight(color);
 
-                    bool top_left_free = (! IS_PIXEL_SOLID(target_buffer[(y - 1) * i_screen_width + x - 1])) &&
-                        target_buffer[(y - 1) * i_screen_width + x - 1] != color &&
-                        (get_pixel_weight(target_buffer[(y - 1) * i_screen_width + x - 1]) > weight ||
-                            (get_pixel_weight(target_buffer[(y - 1) * i_screen_width + x - 1]) == weight && rand() % 4 == 0)
+                    bool top_left_free = (! IS_PIXEL_SOLID(target_buffer[top_left])) &&
+                        target_buffer[top_left] != color &&
+                        (get_pixel_weight(target_buffer[top_left]) > weight ||
+                            (get_pixel_weight(target_buffer[top_left]) == weight && rand() % 4 == 0)
                         );
-                    bool top_center_free = (! IS_PIXEL_SOLID(target_buffer[(y - 1) * i_screen_width + x])) &&
-                        target_buffer[(y - 1) * i_screen_width + x] != color &&
-                        (get_pixel_weight(target_buffer[(y - 1) * i_screen_width + x]) > weight ||
-                            (get_pixel_weight(target_buffer[(y - 1) * i_screen_width + x]) == weight && rand() % 4 == 0)
+                    bool top_center_free = (! IS_PIXEL_SOLID(target_buffer[top_center])) &&
+                        target_buffer[top_center] != color &&
+                        (get_pixel_weight(target_buffer[top_center]) > weight ||
+                            (get_pixel_weight(target_buffer[top_center]) == weight && rand() % 4 == 0)
                         );
-                    bool top_right_free = (! IS_PIXEL_SOLID(target_buffer[(y - 1) * i_screen_width + x + 1])) &&
-                        target_buffer[(y - 1) * i_screen_width + x + 1] != color &&
-                        (get_pixel_weight(target_buffer[(y - 1) * i_screen_width + x + 1]) > weight ||
-                            (get_pixel_weight(target_buffer[(y - 1) * i_screen_width + x + 1]) == weight && rand() % 4 == 0)
-                        );
-
-                    bool left_free = (! IS_PIXEL_SOLID(target_buffer[(y + 1) * i_screen_width + x - 1])) &&
-                        target_buffer[(y + 1) * i_screen_width + x - 1] != color &&
-                        (get_pixel_weight(target_buffer[(y + 1) * i_screen_width + x - 1]) < weight ||
-                            (get_pixel_weight(target_buffer[(y + 1) * i_screen_width + x - 1]) == weight && rand() % 4 == 0)
-                        );
-                    bool center_free = (! IS_PIXEL_SOLID(target_buffer[(y + 1) * i_screen_width + x])) &&
-                        target_buffer[(y + 1) * i_screen_width + x] != color &&
-                        (get_pixel_weight(target_buffer[(y + 1) * i_screen_width + x]) < weight ||
-                            (get_pixel_weight(target_buffer[(y + 1) * i_screen_width + x]) == weight && rand() % 4 == 0)
-                        );
-                    bool right_free = (! IS_PIXEL_SOLID(target_buffer[(y + 1) * i_screen_width + x + 1])) &&
-                        target_buffer[(y + 1) * i_screen_width + x + 1] != color &&
-                        (get_pixel_weight(target_buffer[(y + 1) * i_screen_width + x + 1]) < weight ||
-                            (get_pixel_weight(target_buffer[(y + 1) * i_screen_width + x + 1]) == weight && rand() % 4 == 0)
+                    bool top_right_free = (! IS_PIXEL_SOLID(target_buffer[top_right])) &&
+                        target_buffer[top_right] != color &&
+                        (get_pixel_weight(target_buffer[top_right]) > weight ||
+                            (get_pixel_weight(target_buffer[top_right]) == weight && rand() % 4 == 0)
                         );
 
-                    bool center_left_free = (! IS_PIXEL_SOLID(target_buffer[y * i_screen_width + x - 1])) &&
-                        target_buffer[y * i_screen_width + x - 1] != color &&
-                        (get_pixel_weight(target_buffer[y * i_screen_width + x - 1]) < weight ||
-                            (get_pixel_weight(target_buffer[y * i_screen_width + x - 1]) == weight && rand() % 4 == 0)
+                    bool left_free = (! IS_PIXEL_SOLID(target_buffer[bottom_left])) &&
+                        target_buffer[bottom_left] != color &&
+                        (get_pixel_weight(target_buffer[bottom_left]) < weight ||
+                            (get_pixel_weight(target_buffer[bottom_left]) == weight && rand() % 4 == 0)
                         );
-                    bool center_right_free = (! IS_PIXEL_SOLID(target_buffer[y * i_screen_width + x + 1])) &&
-                        target_buffer[y * i_screen_width + x + 1] != color &&
-                        (get_pixel_weight(target_buffer[y * i_screen_width + x + 1]) < weight ||
-                            (get_pixel_weight(target_buffer[y * i_screen_width + x + 1]) == weight && rand() % 4 == 0)
+                    bool center_free = (! IS_PIXEL_SOLID(target_buffer[bottom_center])) &&
+                        target_buffer[bottom_center] != color &&
+                        (get_pixel_weight(target_buffer[bottom_center]) < weight ||
+                            (get_pixel_weight(target_buffer[bottom_center]) == weight && rand() % 4 == 0)
+                        );
+                    bool right_free = (! IS_PIXEL_SOLID(target_buffer[bottom_right])) &&
+                        target_buffer[bottom_right] != color &&
+                        (get_pixel_weight(target_buffer[bottom_right]) < weight ||
+                            (get_pixel_weight(target_buffer[bottom_right]) == weight && rand() % 4 == 0)
+                        );
+
+                    bool center_left_free = (! IS_PIXEL_SOLID(target_buffer[center_left])) &&
+                        target_buffer[center_left] != color &&
+                        (get_pixel_weight(target_buffer[center_left]) < weight ||
+                            (get_pixel_weight(target_buffer[center_left]) == weight && rand() % 4 == 0)
+                        );
+                    bool center_right_free = (! IS_PIXEL_SOLID(target_buffer[center_right])) &&
+                        target_buffer[center_right] != color &&
+                        (get_pixel_weight(target_buffer[center_right]) < weight ||
+                            (get_pixel_weight(target_buffer[center_right]) == weight && rand() % 4 == 0)
                         );
 
 
@@ -356,40 +355,40 @@ void run_sand (uint32_t* sand, uint32_t* target_buffer)
                             case 0:
                             if (top_left_free)
                             {
-                                target_buffer[y * i_screen_width + x] = target_buffer[(y - 1) * i_screen_width + x - 1];
-                                target_buffer[(y - 1) * i_screen_width + x - 1] = color;
+                                target_buffer[center_center] = target_buffer[top_left];
+                                target_buffer[top_left] = color;
                                 not_moved = false;
                             }
                             break;
                             case 1:
                             if (top_center_free)
                             {
-                                target_buffer[y * i_screen_width + x] = target_buffer[(y - 1) * i_screen_width + x];
-                                target_buffer[(y - 1) * i_screen_width + x] = color;
+                                target_buffer[center_center] = target_buffer[top_center];
+                                target_buffer[top_center] = color;
                                 not_moved = false;
                             }
                             break;
                             case 2:
                             if (top_right_free)
                             {
-                                target_buffer[y * i_screen_width + x] = target_buffer[(y - 1) * i_screen_width + x + 1];
-                                target_buffer[(y - 1) * i_screen_width + x + 1] = color;
+                                target_buffer[center_center] = target_buffer[top_right];
+                                target_buffer[top_right] = color;
                                 not_moved = false;
                             }
                             break;
                             case 3:
                             if (center_left_free)
                             {
-                                target_buffer[y * i_screen_width + x] = target_buffer[y * i_screen_width + x - 1];
-                                target_buffer[y * i_screen_width + x - 1] = color;
+                                target_buffer[center_center] = target_buffer[center_left];
+                                target_buffer[center_left] = color;
                                 not_moved = false;
                             }
                             break;
                             case 4:
                             if (center_right_free)
                             {
-                                target_buffer[y * i_screen_width + x] = target_buffer[y * i_screen_width + x + 1];
-                                target_buffer[y * i_screen_width + x + 1] = color;
+                                target_buffer[center_center] = target_buffer[center_right];
+                                target_buffer[center_right] = color;
                                 not_moved = false;
                             }
                             break;
@@ -397,8 +396,8 @@ void run_sand (uint32_t* sand, uint32_t* target_buffer)
                             case 5:
                             if (left_free)
                             {
-                                target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x - 1];
-                                target_buffer[(y + 1) * i_screen_width + x - 1] = color;
+                                target_buffer[center_center] = target_buffer[bottom_left];
+                                target_buffer[bottom_left] = color;
                                 not_moved = false;
                             }
                             break;
@@ -406,8 +405,8 @@ void run_sand (uint32_t* sand, uint32_t* target_buffer)
                             case 6:
                             if (center_free)
                             {
-                                target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x];
-                                target_buffer[(y + 1) * i_screen_width + x] = color;
+                                target_buffer[center_center] = target_buffer[bottom_center];
+                                target_buffer[bottom_center] = color;
                                 not_moved = false;
                             }
                             break;
@@ -415,8 +414,8 @@ void run_sand (uint32_t* sand, uint32_t* target_buffer)
                             case 7:
                             if (right_free)
                             {
-                                target_buffer[y * i_screen_width + x] = target_buffer[(y + 1) * i_screen_width + x + 1];
-                                target_buffer[(y + 1) * i_screen_width + x + 1] = color;
+                                target_buffer[center_center] = target_buffer[bottom_right];
+                                target_buffer[bottom_right] = color;
                                 not_moved = false;
                             }
                             break;
@@ -429,6 +428,15 @@ void run_sand (uint32_t* sand, uint32_t* target_buffer)
                     }
                 }
             }
+            top_left++;
+            top_center++;
+            top_right++;
+            center_left++;
+            center_center++;
+            center_right++;
+            bottom_left++;
+            bottom_center++;
+            bottom_right++;
         }
     }
 }
