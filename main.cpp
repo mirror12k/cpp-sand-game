@@ -179,7 +179,15 @@ void run_sand (uint32_t* sand, uint32_t* target_buffer)
             uint32_t color = sand[x + i_screen_width * y];
             if (color == *center_center)
             {
-                if (IS_PIXEL_SAND(color))
+                if (color == color_smoke && rand() % 100 == 0) // smoke decomposition
+                {
+                    *center_center = color_black;
+                }
+                else if (color == color_fire && rand() % 50 == 0) // fire decomposition
+                {
+                    *center_center = color_smoke;
+                }
+                else if (IS_PIXEL_SAND(color)) // sand physics
                 {
                     bool left_free = ! IS_PIXEL_SOLID(*bottom_left);
                     bool center_free = ! IS_PIXEL_SOLID(*bottom_center);
@@ -305,7 +313,7 @@ void run_sand (uint32_t* sand, uint32_t* target_buffer)
                         }
                     }
                 }
-                else if (IS_PIXEL_LIQUID(color))
+                else if (IS_PIXEL_LIQUID(color)) // liquid physics
                 {
                     int weight = get_pixel_weight(color);
 
