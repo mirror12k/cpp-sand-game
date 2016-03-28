@@ -43,7 +43,7 @@ uint32_t color_black, color_border,
 
 
 uint32_t current_brush;
-size_t brush_size = 10;
+int brush_size = 10;
 
 uint32_t brush_color_1, brush_color_2, brush_color_3, brush_color_4, brush_color_5, brush_color_6, brush_color_7, brush_color_8;
 
@@ -75,16 +75,16 @@ void process_input(uint32_t* sand)
 
     if (mouse_state & SDL_BUTTON(SDL_BUTTON_LEFT))
     {
-        for (uint p_x = x - brush_size; p_x <= x + brush_size; p_x++)
-            for (uint p_y = y - brush_size; p_y <= y + brush_size; p_y++)
+        for (int p_x = x - brush_size; p_x <= x + brush_size; p_x++)
+            for (int p_y = y - brush_size; p_y <= y + brush_size; p_y++)
                 if (p_x > 0 && p_x < i_screen_width - 1 && p_y > 0 && p_y < i_screen_height - 1)
                     sand[p_y * i_screen_width + p_x] = current_brush;
     }
 
     if (mouse_state & SDL_BUTTON(SDL_BUTTON_RIGHT))
     {
-        for (uint p_x = x - brush_size; p_x <= x + brush_size; p_x++)
-            for (uint p_y = y - brush_size; p_y <= y + brush_size; p_y++)
+        for (int p_x = x - brush_size; p_x <= x + brush_size; p_x++)
+            for (int p_y = y - brush_size; p_y <= y + brush_size; p_y++)
                 if (p_x > 0 && p_x < i_screen_width - 1 && p_y > 0 && p_y < i_screen_height - 1)
                     sand[p_y * i_screen_width + p_x] = color_black;
     }
