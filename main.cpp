@@ -38,7 +38,8 @@ size_t i_screen_height = 600;
 uint32_t color_black, color_border,
     color_sand, color_stone,
     color_water, color_oil, color_acid,
-    color_smoke, color_fire;
+    color_water_acid,
+    color_steam, color_smoke, color_fire;
 
 
 
@@ -139,15 +140,17 @@ int get_pixel_weight(uint32_t color)
 {
     if (color == color_sand)
         return 1000;
-    else if (color == color_water)
+    else if (color == color_water || color == color_water_acid)
         return 500;
     else if (color == color_oil)
         return 300;
     else if (color == color_acid)
         return 500;
     else if (color == color_smoke)
-        return -200;
+        return -400;
     else if (color == color_fire)
+        return -200;
+    else if (color == color_steam)
         return -100;
     else if (color == color_black)
         return 0;
@@ -186,6 +189,148 @@ void run_sand (uint32_t* sand, uint32_t* target_buffer)
                 else if (color == color_fire && rand() % 50 == 0) // fire decomposition
                 {
                     *center_center = color_smoke;
+                }
+                else if (color == color_steam && rand() % 500 == 0) // steam cooling
+                {
+                    *center_center = color_water;
+                }
+                else if ((color == color_water || color == color_water_acid) && rand() % 2 == 0 && (
+                    *top_center == color_fire ||
+                    *center_left == color_fire || *center_right == color_fire ||
+                    *bottom_center == color_fire
+                )) // water/water_acid boiling from fire
+                {
+                    bool not_moved = true;
+                    while (not_moved)
+                    {
+                        switch (rand() % 4)
+                        {
+                        case 0:
+                        if (*top_center == color_fire)
+                        {
+                            *center_center = color_steam;
+                            *top_center = color_black;
+                            not_moved = false;
+                        }
+                        break;
+                        case 1:
+                        if (*center_left == color_fire)
+                        {
+                            *center_center = color_steam;
+                            *center_left = color_black;
+                            not_moved = false;
+                        }
+                        break;
+                        case 2:
+                        if (*center_right == color_fire)
+                        {
+                            *center_center = color_steam;
+                            *center_right = color_black;
+                            not_moved = false;
+                        }
+                        break;
+                        case 3:
+                        if (*bottom_center == color_fire)
+                        {
+                            *center_center = color_steam;
+                            *bottom_center = color_black;
+                            not_moved = false;
+                        }
+                        break;
+                        }
+                    }
+                }
+                else if (color == color_water && rand() % 2 == 0 && (
+                    *top_center == color_acid ||
+                    *center_left == color_acid || *center_right == color_acid ||
+                    *bottom_center == color_acid
+                )) // acid dissolving in water
+                {
+                    bool not_moved = true;
+                    while (not_moved)
+                    {
+                        switch (rand() % 4)
+                        {
+                        case 0:
+                        if (*top_center == color_acid)
+                        {
+                            *center_center = color_water_acid;
+                            *top_center = color_water_acid;
+                            not_moved = false;
+                        }
+                        break;
+                        case 1:
+                        if (*center_left == color_acid)
+                        {
+                            *center_center = color_water_acid;
+                            *center_left = color_water_acid;
+                            not_moved = false;
+                        }
+                        break;
+                        case 2:
+                        if (*center_right == color_acid)
+                        {
+                            *center_center = color_water_acid;
+                            *center_right = color_water_acid;
+                            not_moved = false;
+                        }
+                        break;
+                        case 3:
+                        if (*bottom_center == color_acid)
+                        {
+                            *center_center = color_water_acid;
+                            *bottom_center = color_water_acid;
+                            not_moved = false;
+                        }
+                        break;
+                        }
+                    }
+                }
+                else if (color == color_water_acid && rand() % 50 == 0 && (
+                    *top_center == color_water_acid ||
+                    *center_left == color_water_acid || *center_right == color_water_acid ||
+                    *bottom_center == color_water_acid
+                )) // acid depositing out of concentrated acidic water
+                {
+                    bool not_moved = true;
+                    while (not_moved)
+                    {
+                        switch (rand() % 4)
+                        {
+                        case 0:
+                        if (*top_center == color_water_acid)
+                        {
+                            *center_center = color_acid;
+                            *top_center = color_water;
+                            not_moved = false;
+                        }
+                        break;
+                        case 1:
+                        if (*center_left == color_water_acid)
+                        {
+                            *center_center = color_acid;
+                            *center_left = color_water;
+                            not_moved = false;
+                        }
+                        break;
+                        case 2:
+                        if (*center_right == color_water_acid)
+                        {
+                            *center_center = color_acid;
+                            *center_right = color_water;
+                            not_moved = false;
+                        }
+                        break;
+                        case 3:
+                        if (*bottom_center == color_water_acid)
+                        {
+                            *center_center = color_acid;
+                            *bottom_center = color_water;
+                            not_moved = false;
+                        }
+                        break;
+                        }
+                    }
                 }
                 else if (IS_PIXEL_SAND(color)) // sand physics
                 {
@@ -481,9 +626,11 @@ int main (int argc, char** argv)
     color_border = MAKE_PIXEL_SOLID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 255, 255, 255)));
     color_sand = MAKE_PIXEL_SAND(MAKE_PIXEL_SOLID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 200, 100, 50))));
     color_water = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 50, 50, 128)));
+    color_water_acid = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 110, 50, 128)));
     color_oil = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 100, 128, 80)));
     color_acid = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 230, 30, 100)));
     color_stone = MAKE_PIXEL_SOLID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 128, 128, 128)));
+    color_steam = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 90, 90, 188)));
     color_smoke = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 30, 30, 30)));
     color_fire = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 255, 128, 64)));
 
@@ -494,8 +641,7 @@ int main (int argc, char** argv)
     brush_color_3 = color_oil;
     brush_color_4 = color_stone;
     brush_color_5 = color_acid;
-    brush_color_6 = color_smoke;
-    brush_color_7 = color_fire;
+    brush_color_6 = color_fire;
 
     uint32_t* bitmap = (uint32_t*)malloc(i_screen_width * i_screen_height * 4);
     uint32_t* swap_bitmap = (uint32_t*)malloc(i_screen_width * i_screen_height * 4);
