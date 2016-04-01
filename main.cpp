@@ -36,9 +36,9 @@ size_t i_screen_height = 600;
 
 
 uint32_t color_black, color_border,
-    color_sand, color_stone,
-    color_water, color_oil, color_acid,
-    color_water_acid,
+    color_calcium, color_sand, color_stone,
+    color_water, color_water_acid, color_water_calciated,
+    color_oil, color_oil_burning, color_acid,
     color_steam, color_smoke, color_fire;
 
 
@@ -140,7 +140,9 @@ int get_pixel_weight(uint32_t color)
 {
     if (color == color_sand)
         return 1000;
-    else if (color == color_water || color == color_water_acid)
+    else if (color == color_calcium)
+        return 700;
+    else if (color == color_water || color == color_water_acid || color == color_water_calciated)
         return 500;
     else if (color == color_oil)
         return 300;
@@ -331,6 +333,234 @@ void run_sand (uint32_t* sand, uint32_t* target_buffer)
                         break;
                         }
                     }
+                }
+                else if (color == color_water_acid && rand() % 50 == 0 && (
+                    *top_center == color_sand ||
+                    *center_left == color_sand || *center_right == color_sand ||
+                    *bottom_center == color_sand
+                )) // acidic water dissolving sand to calciated water
+                {
+                    bool not_moved = true;
+                    while (not_moved)
+                    {
+                        switch (rand() % 4)
+                        {
+                        case 0:
+                        if (*top_center == color_sand)
+                        {
+                            *center_center = color_black;
+                            *top_center = color_water_calciated;
+                            not_moved = false;
+                        }
+                        break;
+                        case 1:
+                        if (*center_left == color_sand)
+                        {
+                            *center_center = color_black;
+                            *center_left = color_water_calciated;
+                            not_moved = false;
+                        }
+                        break;
+                        case 2:
+                        if (*center_right == color_sand)
+                        {
+                            *center_center = color_black;
+                            *center_right = color_water_calciated;
+                            not_moved = false;
+                        }
+                        break;
+                        case 3:
+                        if (*bottom_center == color_sand)
+                        {
+                            *center_center = color_black;
+                            *bottom_center = color_water_calciated;
+                            not_moved = false;
+                        }
+                        break;
+                        }
+                    }
+                }
+                else if (color == color_water_calciated && rand() % 400 == 0 && (
+                    *top_center == color_water_calciated ||
+                    *center_left == color_water_calciated || *center_right == color_water_calciated ||
+                    *bottom_center == color_water_calciated
+                )) // heavily calcinated water depositing calcium
+                {
+                    bool not_moved = true;
+                    while (not_moved)
+                    {
+                        switch (rand() % 4)
+                        {
+                        case 0:
+                        if (*top_center == color_water_calciated)
+                        {
+                            *center_center = color_calcium;
+                            *top_center = color_water;
+                            not_moved = false;
+                        }
+                        break;
+                        case 1:
+                        if (*center_left == color_water_calciated)
+                        {
+                            *center_center = color_calcium;
+                            *center_left = color_water;
+                            not_moved = false;
+                        }
+                        break;
+                        case 2:
+                        if (*center_right == color_water_calciated)
+                        {
+                            *center_center = color_calcium;
+                            *center_right = color_water;
+                            not_moved = false;
+                        }
+                        break;
+                        case 3:
+                        if (*bottom_center == color_water_calciated)
+                        {
+                            *center_center = color_calcium;
+                            *bottom_center = color_water;
+                            not_moved = false;
+                        }
+                        break;
+                        }
+                    }
+                }
+                else if (color == color_water_acid && rand() % 50 == 0 && (
+                    *top_center == color_calcium ||
+                    *center_left == color_calcium || *center_right == color_calcium ||
+                    *bottom_center == color_calcium
+                )) // acidic water disolving calcium
+                {
+                    bool not_moved = true;
+                    while (not_moved)
+                    {
+                        switch (rand() % 4)
+                        {
+                        case 0:
+                        if (*top_center == color_calcium)
+                        {
+                            *center_center = color_water_calciated;
+                            *top_center = color_water_calciated;
+                            not_moved = false;
+                        }
+                        break;
+                        case 1:
+                        if (*center_left == color_calcium)
+                        {
+                            *center_center = color_water_calciated;
+                            *center_left = color_water_calciated;
+                            not_moved = false;
+                        }
+                        break;
+                        case 2:
+                        if (*center_right == color_calcium)
+                        {
+                            *center_center = color_water_calciated;
+                            *center_right = color_water_calciated;
+                            not_moved = false;
+                        }
+                        break;
+                        case 3:
+                        if (*bottom_center == color_calcium)
+                        {
+                            *center_center = color_water_calciated;
+                            *bottom_center = color_water_calciated;
+                            not_moved = false;
+                        }
+                        break;
+                        }
+                    }
+                }
+                else if (color == color_oil && rand() % 30 == 0 && (
+                    *top_center == color_fire || *top_center == color_oil_burning ||
+                    *center_left == color_fire || *center_left == color_oil_burning ||
+                    *center_right == color_fire || *center_right == color_oil_burning ||
+                    *bottom_center == color_fire || *bottom_center == color_oil_burning
+                )) // oil starting to burn
+                {
+                    bool not_moved = true;
+                    while (not_moved)
+                    {
+                        switch (rand() % 4)
+                        {
+                        case 0:
+                        if (*top_center == color_fire || *top_center == color_oil_burning)
+                        {
+                            *center_center = color_oil_burning;
+                            not_moved = false;
+                        }
+                        break;
+                        case 1:
+                        if (*center_left == color_fire || *center_left == color_oil_burning)
+                        {
+                            *center_center = color_oil_burning;
+                            not_moved = false;
+                        }
+                        break;
+                        case 2:
+                        if (*center_right == color_fire || *center_right == color_oil_burning)
+                        {
+                            *center_center = color_oil_burning;
+                            not_moved = false;
+                        }
+                        break;
+                        case 3:
+                        if (*bottom_center == color_fire || *bottom_center == color_oil_burning)
+                        {
+                            *center_center = color_oil_burning;
+                            not_moved = false;
+                        }
+                        break;
+                        }
+                    }
+                }
+                else if (color == color_oil_burning && rand() % 10 == 0 && (
+                    *top_center == color_black ||
+                    *center_left == color_black ||
+                    *center_right == color_black ||
+                    *bottom_center == color_black
+                )) // oil burning
+                {
+                    bool not_moved = true;
+                    while (not_moved)
+                    {
+                        switch (rand() % 4)
+                        {
+                        case 0:
+                        if (*top_center == color_black)
+                        {
+                            *top_center = color_fire;
+                            not_moved = false;
+                        }
+                        break;
+                        case 1:
+                        if (*center_left == color_black)
+                        {
+                            *center_left = color_fire;
+                            not_moved = false;
+                        }
+                        break;
+                        case 2:
+                        if (*center_right == color_black)
+                        {
+                            *center_right = color_fire;
+                            not_moved = false;
+                        }
+                        break;
+                        case 3:
+                        if (*bottom_center == color_black)
+                        {
+                            *bottom_center = color_fire;
+                            not_moved = false;
+                        }
+                        break;
+                        }
+                    }
+                }
+                else if (color == color_oil_burning && rand() % 200 == 0) // oil burning decomposition
+                {
+                    *center_center = color_black;
                 }
                 else if (IS_PIXEL_SAND(color)) // sand physics
                 {
@@ -624,12 +854,18 @@ int main (int argc, char** argv)
 
     color_black = SDL_MapRGB(srf_backbuffer->format, 0, 0, 0);
     color_border = MAKE_PIXEL_SOLID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 255, 255, 255)));
+    color_stone = MAKE_PIXEL_SOLID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 128, 128, 128)));
     color_sand = MAKE_PIXEL_SAND(MAKE_PIXEL_SOLID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 200, 100, 50))));
+    color_calcium = MAKE_PIXEL_SAND(MAKE_PIXEL_SOLID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 164, 164, 164))));
+
     color_water = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 50, 50, 128)));
     color_water_acid = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 110, 50, 128)));
-    color_oil = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 100, 128, 80)));
+    color_water_calciated = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 110, 120, 128)));
     color_acid = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 230, 30, 100)));
-    color_stone = MAKE_PIXEL_SOLID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 128, 128, 128)));
+
+    color_oil = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 100, 128, 80)));
+    color_oil_burning = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 90, 110, 70)));
+
     color_steam = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 90, 90, 188)));
     color_smoke = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 30, 30, 30)));
     color_fire = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 255, 128, 64)));
