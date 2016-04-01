@@ -36,6 +36,7 @@ size_t i_screen_height = 600;
 
 
 uint32_t color_black, color_border,
+    color_void, color_source_water, color_source_oil,
     color_calcium, color_sand, color_stone,
     color_water, color_water_acid, color_water_calciated, color_water_algea,
     color_oil, color_oil_burning, color_acid,
@@ -110,6 +111,10 @@ void process_input(uint32_t* sand)
 		current_brush = brush_color_7;
 	if (keys[SDLK_8])
 		current_brush = brush_color_8;
+	if (keys[SDLK_v])
+		current_brush = color_void;
+	if (keys[SDLK_i])
+		current_brush = color_source_oil;
 	if (keys[SDLK_p])
         if (++brush_size > 100)
             brush_size = 100;
@@ -474,7 +479,7 @@ void run_sand (uint32_t* sand, uint32_t* target_buffer)
                         }
                     }
                 }
-                else if (color == color_water_acid && rand() % 25 == 0 && (
+                else if (color == color_water_acid && rand() % 10 == 0 && (
                     *top_center == color_calcium ||
                     *center_left == color_calcium || *center_right == color_calcium ||
                     *bottom_center == color_calcium
@@ -702,13 +707,116 @@ void run_sand (uint32_t* sand, uint32_t* target_buffer)
                         }
                     }
                 }
-                else if (color == color_water_algea && rand() % 30 == 0 && (
+                else if (color == color_water_algea && rand() % 10 == 0 && (
                     *top_center == color_acid ||
                     *center_left == color_acid || *center_right == color_acid ||
                     *bottom_center == color_acid
                 )) // concentrated acid killing algea
                 {
                     *center_center = color_water;
+                }
+                else if (color == color_void) // void deleting everything
+                {
+                    if (*top_center != color_void && *top_center != color_border)
+                    {
+                        *top_center = color_black;
+                    }
+                    if (*center_left != color_void && *center_left != color_border)
+                    {
+                        *center_left = color_black;
+                    }
+                    if (*center_right != color_void && *center_right != color_border)
+                    {
+                        *center_right = color_black;
+                    }
+                    if (*bottom_center != color_void && *bottom_center != color_border)
+                    {
+                        *bottom_center = color_black;
+                    }
+                }
+                else if (color == color_source_water && rand() % 4 == 0 && (
+                    *top_center == color_black ||
+                    *center_left == color_black || *center_right == color_black ||
+                    *bottom_center == color_black
+                )) // algea acidifying the water
+                {
+                    bool not_moved = true;
+                    while (not_moved)
+                    {
+                        switch (rand() % 4)
+                        {
+                        case 0:
+                        if (*top_center == color_black)
+                        {
+                            *top_center = color_water;
+                            not_moved = false;
+                        }
+                        break;
+                        case 1:
+                        if (*center_left == color_black)
+                        {
+                            *center_left = color_water;
+                            not_moved = false;
+                        }
+                        break;
+                        case 2:
+                        if (*center_right == color_black)
+                        {
+                            *center_right = color_water;
+                            not_moved = false;
+                        }
+                        break;
+                        case 3:
+                        if (*bottom_center == color_black)
+                        {
+                            *bottom_center = color_water;
+                            not_moved = false;
+                        }
+                        break;
+                        }
+                    }
+                }
+                else if (color == color_source_oil && rand() % 4 == 0 && (
+                    *top_center == color_black ||
+                    *center_left == color_black || *center_right == color_black ||
+                    *bottom_center == color_black
+                )) // algea acidifying the water
+                {
+                    bool not_moved = true;
+                    while (not_moved)
+                    {
+                        switch (rand() % 4)
+                        {
+                        case 0:
+                        if (*top_center == color_black)
+                        {
+                            *top_center = color_oil;
+                            not_moved = false;
+                        }
+                        break;
+                        case 1:
+                        if (*center_left == color_black)
+                        {
+                            *center_left = color_oil;
+                            not_moved = false;
+                        }
+                        break;
+                        case 2:
+                        if (*center_right == color_black)
+                        {
+                            *center_right = color_oil;
+                            not_moved = false;
+                        }
+                        break;
+                        case 3:
+                        if (*bottom_center == color_black)
+                        {
+                            *bottom_center = color_oil;
+                            not_moved = false;
+                        }
+                        break;
+                        }
+                    }
                 }
                 else if (IS_PIXEL_SAND(color)) // sand physics
                 {
@@ -1002,6 +1110,11 @@ int main (int argc, char** argv)
 
     color_black = SDL_MapRGB(srf_backbuffer->format, 0, 0, 0);
     color_border = MAKE_PIXEL_SOLID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 255, 255, 255)));
+    color_void = MAKE_PIXEL_SOLID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 230, 230, 230)));
+
+    color_source_water = MAKE_PIXEL_SOLID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 30, 30, 108)));
+    color_source_oil = MAKE_PIXEL_SOLID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 40, 0, 40)));
+
     color_stone = MAKE_PIXEL_SOLID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 128, 128, 128)));
     color_sand = MAKE_PIXEL_SAND(MAKE_PIXEL_SOLID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 200, 100, 50))));
     color_calcium = MAKE_PIXEL_SAND(MAKE_PIXEL_SOLID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 164, 164, 164))));
@@ -1012,8 +1125,8 @@ int main (int argc, char** argv)
     color_water_algea = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 90, 40, 40)));
     color_acid = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 230, 30, 100)));
 
-    color_oil = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 100, 128, 80)));
-    color_oil_burning = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 90, 110, 70)));
+    color_oil = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 60, 20, 60)));
+    color_oil_burning = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 80, 40, 60)));
 
     color_steam = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 90, 90, 188)));
     color_smoke = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 30, 30, 30)));
@@ -1028,6 +1141,7 @@ int main (int argc, char** argv)
     brush_color_5 = color_acid;
     brush_color_6 = color_fire;
     brush_color_7 = color_water_algea;
+    brush_color_8 = color_source_water;
 
     uint32_t* bitmap = (uint32_t*)malloc(i_screen_width * i_screen_height * 4);
     uint32_t* swap_bitmap = (uint32_t*)malloc(i_screen_width * i_screen_height * 4);
