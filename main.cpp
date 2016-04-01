@@ -37,7 +37,7 @@ size_t i_screen_height = 600;
 
 uint32_t color_black, color_border,
     color_calcium, color_sand, color_stone,
-    color_water, color_water_acid, color_water_calciated,
+    color_water, color_water_acid, color_water_calciated, color_water_algea,
     color_oil, color_oil_burning, color_acid,
     color_steam, color_smoke, color_fire;
 
@@ -141,11 +141,13 @@ int get_pixel_weight(uint32_t color)
     if (color == color_sand)
         return 1000;
     else if (color == color_calcium)
-        return 700;
-    else if (color == color_water || color == color_water_acid || color == color_water_calciated)
+        return 1500;
+    else if (color == color_water || color == color_water_acid || color == color_water_calciated || color == color_water_algea)
         return 500;
     else if (color == color_oil)
         return 300;
+    else if (color == color_oil_burning)
+        return 250;
     else if (color == color_acid)
         return 500;
     else if (color == color_smoke)
@@ -182,7 +184,7 @@ void run_sand (uint32_t* sand, uint32_t* target_buffer)
         for (uint x = 1; x < i_screen_width - 1; x++)
         {
             uint32_t color = sand[x + i_screen_width * y];
-            if (color == *center_center)
+            if (color != color_black && color == *center_center)
             {
                 if (color == color_smoke && rand() % 100 == 0) // smoke decomposition
                 {
@@ -426,7 +428,53 @@ void run_sand (uint32_t* sand, uint32_t* target_buffer)
                         }
                     }
                 }
-                else if (color == color_water_acid && rand() % 50 == 0 && (
+                else if (color == color_calcium && rand() % 500 == 0 && (
+                    *top_center == color_water ||
+                    *center_left == color_water || *center_right == color_water ||
+                    *bottom_center == color_water
+                )) // water lightly disolving calcium
+                {
+                    bool not_moved = true;
+                    while (not_moved)
+                    {
+                        switch (rand() % 4)
+                        {
+                        case 0:
+                        if (*top_center == color_water)
+                        {
+                            *center_center = color_water_calciated;
+                            *top_center = color_water_calciated;
+                            not_moved = false;
+                        }
+                        break;
+                        case 1:
+                        if (*center_left == color_water)
+                        {
+                            *center_center = color_water_calciated;
+                            *center_left = color_water_calciated;
+                            not_moved = false;
+                        }
+                        break;
+                        case 2:
+                        if (*center_right == color_water)
+                        {
+                            *center_center = color_water_calciated;
+                            *center_right = color_water_calciated;
+                            not_moved = false;
+                        }
+                        break;
+                        case 3:
+                        if (*bottom_center == color_water)
+                        {
+                            *center_center = color_water_calciated;
+                            *bottom_center = color_water_calciated;
+                            not_moved = false;
+                        }
+                        break;
+                        }
+                    }
+                }
+                else if (color == color_water_acid && rand() % 25 == 0 && (
                     *top_center == color_calcium ||
                     *center_left == color_calcium || *center_right == color_calcium ||
                     *bottom_center == color_calcium
@@ -561,6 +609,106 @@ void run_sand (uint32_t* sand, uint32_t* target_buffer)
                 else if (color == color_oil_burning && rand() % 200 == 0) // oil burning decomposition
                 {
                     *center_center = color_black;
+                }
+                else if (color == color_water_algea && rand() % 200 == 0) // algea dying
+                {
+                    *center_center = color_water;
+                }
+                else if (color == color_water_algea && rand() % 70 == 0 && (
+                    *top_center == color_water ||
+                    *center_left == color_water || *center_right == color_water ||
+                    *bottom_center == color_water
+                )) // algea replicating
+                {
+                    bool not_moved = true;
+                    while (not_moved)
+                    {
+                        switch (rand() % 4)
+                        {
+                        case 0:
+                        if (*top_center == color_water)
+                        {
+                            *center_center = color_water_algea;
+                            *top_center = color_water_algea;
+                            not_moved = false;
+                        }
+                        break;
+                        case 1:
+                        if (*center_left == color_water)
+                        {
+                            *center_center = color_water_algea;
+                            *center_left = color_water_algea;
+                            not_moved = false;
+                        }
+                        break;
+                        case 2:
+                        if (*center_right == color_water)
+                        {
+                            *center_center = color_water_algea;
+                            *center_right = color_water_algea;
+                            not_moved = false;
+                        }
+                        break;
+                        case 3:
+                        if (*bottom_center == color_water)
+                        {
+                            *center_center = color_water_algea;
+                            *bottom_center = color_water_algea;
+                            not_moved = false;
+                        }
+                        break;
+                        }
+                    }
+                }
+                else if (color == color_water_algea && rand() % 100 == 0 && (
+                    *top_center == color_water ||
+                    *center_left == color_water || *center_right == color_water ||
+                    *bottom_center == color_water
+                )) // algea acidifying the water
+                {
+                    bool not_moved = true;
+                    while (not_moved)
+                    {
+                        switch (rand() % 4)
+                        {
+                        case 0:
+                        if (*top_center == color_water)
+                        {
+                            *top_center = color_water_acid;
+                            not_moved = false;
+                        }
+                        break;
+                        case 1:
+                        if (*center_left == color_water)
+                        {
+                            *center_left = color_water_acid;
+                            not_moved = false;
+                        }
+                        break;
+                        case 2:
+                        if (*center_right == color_water)
+                        {
+                            *center_right = color_water_acid;
+                            not_moved = false;
+                        }
+                        break;
+                        case 3:
+                        if (*bottom_center == color_water)
+                        {
+                            *bottom_center = color_water_acid;
+                            not_moved = false;
+                        }
+                        break;
+                        }
+                    }
+                }
+                else if (color == color_water_algea && rand() % 30 == 0 && (
+                    *top_center == color_acid ||
+                    *center_left == color_acid || *center_right == color_acid ||
+                    *bottom_center == color_acid
+                )) // concentrated acid killing algea
+                {
+                    *center_center = color_water;
                 }
                 else if (IS_PIXEL_SAND(color)) // sand physics
                 {
@@ -859,8 +1007,9 @@ int main (int argc, char** argv)
     color_calcium = MAKE_PIXEL_SAND(MAKE_PIXEL_SOLID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 164, 164, 164))));
 
     color_water = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 50, 50, 128)));
-    color_water_acid = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 110, 50, 128)));
-    color_water_calciated = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 110, 120, 128)));
+    color_water_acid = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 140, 80, 168)));
+    color_water_calciated = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 110, 150, 128)));
+    color_water_algea = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 90, 40, 40)));
     color_acid = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 230, 30, 100)));
 
     color_oil = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 100, 128, 80)));
@@ -873,11 +1022,12 @@ int main (int argc, char** argv)
     current_brush = color_sand;
 
     brush_color_1 = color_water;
-    brush_color_2 = color_sand;
+    brush_color_2 = color_calcium;
     brush_color_3 = color_oil;
     brush_color_4 = color_stone;
     brush_color_5 = color_acid;
     brush_color_6 = color_fire;
+    brush_color_7 = color_water_algea;
 
     uint32_t* bitmap = (uint32_t*)malloc(i_screen_width * i_screen_height * 4);
     uint32_t* swap_bitmap = (uint32_t*)malloc(i_screen_width * i_screen_height * 4);
