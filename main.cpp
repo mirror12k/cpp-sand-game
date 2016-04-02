@@ -36,11 +36,11 @@ size_t i_screen_height = 600;
 
 
 uint32_t color_black, color_border,
-    color_void, color_source_water, color_source_oil,
+    color_void, color_source_water, color_source_oil, color_source_methane,
     color_calcium, color_sand, color_stone,
     color_water, color_water_acid, color_water_calciated, color_water_algea,
     color_oil, color_oil_burning, color_acid,
-    color_steam, color_smoke, color_fire;
+    color_methane, color_methane_burning, color_steam, color_smoke, color_fire;
 
 
 
@@ -111,9 +111,13 @@ void process_input(uint32_t* sand)
 		current_brush = brush_color_7;
 	if (keys[SDLK_8])
 		current_brush = brush_color_8;
-	if (keys[SDLK_v])
+	if (keys[SDLK_q])
 		current_brush = color_void;
-	if (keys[SDLK_i])
+	if (keys[SDLK_w])
+		current_brush = color_source_water;
+	if (keys[SDLK_e])
+		current_brush = color_source_methane;
+	if (keys[SDLK_r])
 		current_brush = color_source_oil;
 	if (keys[SDLK_p])
         if (++brush_size > 100)
@@ -155,6 +159,8 @@ int get_pixel_weight(uint32_t color)
         return 250;
     else if (color == color_acid)
         return 500;
+    else if (color == color_methane || color == color_methane)
+        return -200;
     else if (color == color_smoke)
         return -400;
     else if (color == color_fire)
@@ -568,6 +574,62 @@ void run_sand (uint32_t* sand, uint32_t* target_buffer)
                         }
                     }
                 }
+                else if (color == color_methane && rand() % 2 == 0 && (
+                    *top_center == color_fire || *top_center == color_methane_burning ||
+                    *center_left == color_fire || *center_left == color_methane_burning ||
+                    *center_right == color_fire || *center_right == color_methane_burning ||
+                    *bottom_center == color_fire || *bottom_center == color_methane_burning
+                )) // methane lighting on fire
+                {
+                    *center_center = color_methane_burning;
+                }
+                else if (color == color_methane_burning && rand() % 10 == 0) // methane burning out
+                {
+                    *center_center = color_black;
+                }
+                else if (color == color_methane_burning && rand() % 5 == 0 && (
+                    *top_center == color_black ||
+                    *center_left == color_black ||
+                    *center_right == color_black ||
+                    *bottom_center == color_black
+                )) // methane burning
+                {
+                    bool not_moved = true;
+                    while (not_moved)
+                    {
+                        switch (rand() % 4)
+                        {
+                        case 0:
+                        if (*top_center == color_black)
+                        {
+                            *top_center = color_fire;
+                            not_moved = false;
+                        }
+                        break;
+                        case 1:
+                        if (*center_left == color_black)
+                        {
+                            *center_left = color_fire;
+                            not_moved = false;
+                        }
+                        break;
+                        case 2:
+                        if (*center_right == color_black)
+                        {
+                            *center_right = color_fire;
+                            not_moved = false;
+                        }
+                        break;
+                        case 3:
+                        if (*bottom_center == color_black)
+                        {
+                            *bottom_center = color_fire;
+                            not_moved = false;
+                        }
+                        break;
+                        }
+                    }
+                }
                 else if (color == color_oil_burning && rand() % 10 == 0 && (
                     *top_center == color_black ||
                     *center_left == color_black ||
@@ -738,7 +800,7 @@ void run_sand (uint32_t* sand, uint32_t* target_buffer)
                     *top_center == color_black ||
                     *center_left == color_black || *center_right == color_black ||
                     *bottom_center == color_black
-                )) // algea acidifying the water
+                )) // water source spawning
                 {
                     bool not_moved = true;
                     while (not_moved)
@@ -780,7 +842,7 @@ void run_sand (uint32_t* sand, uint32_t* target_buffer)
                     *top_center == color_black ||
                     *center_left == color_black || *center_right == color_black ||
                     *bottom_center == color_black
-                )) // algea acidifying the water
+                )) // oil source spawning
                 {
                     bool not_moved = true;
                     while (not_moved)
@@ -812,6 +874,48 @@ void run_sand (uint32_t* sand, uint32_t* target_buffer)
                         if (*bottom_center == color_black)
                         {
                             *bottom_center = color_oil;
+                            not_moved = false;
+                        }
+                        break;
+                        }
+                    }
+                }
+                else if (color == color_source_methane && rand() % 4 == 0 && (
+                    *top_center == color_black ||
+                    *center_left == color_black || *center_right == color_black ||
+                    *bottom_center == color_black
+                )) // methane source spawning
+                {
+                    bool not_moved = true;
+                    while (not_moved)
+                    {
+                        switch (rand() % 4)
+                        {
+                        case 0:
+                        if (*top_center == color_black)
+                        {
+                            *top_center = color_methane;
+                            not_moved = false;
+                        }
+                        break;
+                        case 1:
+                        if (*center_left == color_black)
+                        {
+                            *center_left = color_methane;
+                            not_moved = false;
+                        }
+                        break;
+                        case 2:
+                        if (*center_right == color_black)
+                        {
+                            *center_right = color_methane;
+                            not_moved = false;
+                        }
+                        break;
+                        case 3:
+                        if (*bottom_center == color_black)
+                        {
+                            *bottom_center = color_methane;
                             not_moved = false;
                         }
                         break;
@@ -1114,6 +1218,7 @@ int main (int argc, char** argv)
 
     color_source_water = MAKE_PIXEL_SOLID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 30, 30, 108)));
     color_source_oil = MAKE_PIXEL_SOLID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 40, 0, 40)));
+    color_source_methane = MAKE_PIXEL_SOLID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 40, 138, 40)));
 
     color_stone = MAKE_PIXEL_SOLID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 128, 128, 128)));
     color_sand = MAKE_PIXEL_SAND(MAKE_PIXEL_SOLID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 200, 100, 50))));
@@ -1128,6 +1233,8 @@ int main (int argc, char** argv)
     color_oil = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 60, 20, 60)));
     color_oil_burning = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 80, 40, 60)));
 
+    color_methane = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 90, 188, 90)));
+    color_methane_burning = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 120, 188, 90)));
     color_steam = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 90, 90, 188)));
     color_smoke = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 30, 30, 30)));
     color_fire = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 255, 128, 64)));
@@ -1141,7 +1248,7 @@ int main (int argc, char** argv)
     brush_color_5 = color_acid;
     brush_color_6 = color_fire;
     brush_color_7 = color_water_algea;
-    brush_color_8 = color_source_water;
+    brush_color_8 = color_methane;
 
     uint32_t* bitmap = (uint32_t*)malloc(i_screen_width * i_screen_height * 4);
     uint32_t* swap_bitmap = (uint32_t*)malloc(i_screen_width * i_screen_height * 4);
