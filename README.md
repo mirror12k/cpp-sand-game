@@ -1,6 +1,14 @@
 # sand game
 a simple sand game written with the sdl library
 
+## screenshots
+### acid dissolving
+![alt text](https://raw.githubusercontent.com/mirror12k/cpp-sand-game/master/screenshots/acid_dissolving.png)
+### algea acidifying water
+![alt text](https://raw.githubusercontent.com/mirror12k/cpp-sand-game/master/screenshots/algea_acidifying_water.png)
+### methane burning
+![alt text](https://raw.githubusercontent.com/mirror12k/cpp-sand-game/master/screenshots/methane_burning.png)
+
 ## hotkeys
  - left mouse = draw with current brush
  - right mouse = erase
