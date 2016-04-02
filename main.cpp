@@ -1239,7 +1239,7 @@ int main (int argc, char** argv)
     color_smoke = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 30, 30, 30)));
     color_fire = MAKE_PIXEL_LIQUID(CLEAR_PIXEL_BITS(SDL_MapRGB(srf_backbuffer->format, 255, 128, 64)));
 
-    current_brush = color_sand;
+    current_brush = color_water;
 
     brush_color_1 = color_water;
     brush_color_2 = color_calcium;
